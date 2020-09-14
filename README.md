@@ -71,9 +71,16 @@ cdata.params['max_outgoing'] = 10
 cdata.params['min_score'] = 0.1
 ```
 
-3. Run CStreet.
+3. Run CStreet
 
 ```python
 cdata.run_cstreet()
 ```
 
+
+
+# Result
+
+**An example of inferenced cell trajectory**:
+
+![results.png](https://github.com/yw-Hua/MarkdownPicture/blob/master/CStreet/results.png?raw=true)
