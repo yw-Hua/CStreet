@@ -1,6 +1,6 @@
 # CStreet Overview
 
-CStreet is a python script (python 3) for cell trajectory construction by using k-nearest neighbors graph algorithm. It aims at time-series single-cell RNA-seq data. It is a developmental version.
+CStreet is a python script (python 3) for cell trajectory construction by using k-nearest neighbors graph algorithm. It aims at time-series single-cell RNA-seq data. It is a **developmental version**.
 
 # Installation
 
