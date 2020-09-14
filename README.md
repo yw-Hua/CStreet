@@ -71,7 +71,7 @@ cdata.params['max_outgoing'] = 10
 cdata.params['min_score'] = 0.1
 ```
 
-3. Run CStreet
+3. Run CStreet.
 
 ```python
 cdata.run_cstreet()
