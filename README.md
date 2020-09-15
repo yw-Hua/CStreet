@@ -8,18 +8,18 @@ CStreet is a python script (python 3.6 or higher) for cell states trajectory con
    CStreet depends on a number of `python3` packages available on pypi and all dependencies can be installed using  `pip3` commands :
 
    ```shell
-   $> pip3 install scanpy
-   $> pip3 install anndata
-   $> pip3 install networkx
-   $> pip3 install fa2
+   $ pip3 install scanpy
+   $ pip3 install anndata
+   $ pip3 install networkx
+   $ pip3 install fa2
    ```
 
 2. Download CStreet from github
    CStreet can be download using `git` command:
 
    ```shell
-   $> cd /PATH/ # here you can replace "/PATH/" with any location you want
-   $> git clone git://github.com/TongjiZhanglab/CStreet.git
+   $ cd /PATH/ # here you can replace "/PATH/" with any location you want
+   $ git clone git://github.com/TongjiZhanglab/CStreet.git
    ```
 
 3. Import the main class
