@@ -98,7 +98,7 @@ class CStreetData(object):
         for (timepoint,adata) in self.timepoint_scdata_dict.items():
             print(f"timepoint:{timepoint}")
             if adata.uns['cluster_flag'] :
-                print(f"clusters have been gave")
+                print(f"clusters have been given.")
                 continue
             adata_copy=adata.copy()
             adata_copy.obs_names_make_unique()
