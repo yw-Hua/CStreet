@@ -1,25 +1,32 @@
 # CStreet Overview
 
-CStreet is a python script (python 3.6 or higher) for cell trajectory construction by using k-nearest neighbors graph algorithm. It aims at time-series single-cell RNA-seq data. It is a **developmental version**.
+CStreet is a python script (python 3.6 or higher) for cell states trajectory construction by using *k*-nearest neighbors graph algorithm for time-series single-cell RNA-seq data. It is a **developmental version**.
 
 # Installation
 
 1. Prepare required packages
+   CStreet depends on a number of `python3` packages available on pypi and all dependencies can be installed using  `pip3` commands :
 
    ```shell
-   pip install scanpy
-   pip install anndata
-   pip install networkx
-   pip install fa2
+   $> pip3 install scanpy
+   $> pip3 install anndata
+   $> pip3 install networkx
+   $> pip3 install fa2
    ```
 
-2. Download python scripts from github
+2. Download CStreet from github
+   CStreet can be download using `git` command:
+
+   ```shell
+   $> cd /PATH/ # here you can replace "/PATH/" with any location you want
+   $> git clone git://github.com/TongjiZhanglab/CStreet.git
+   ```
 
 3. Import the main class
 
    ```python
    import sys
-   sys.path.append("/PATH/CStreet/src/")
+   sys.path.append("/PATH/CStreet/") # here you should replace "/PATH/" with the location where CStreet has been installed at
    from cstreet import *
    ```
 
@@ -29,9 +36,9 @@ CStreet is a python script (python 3.6 or higher) for cell trajectory constructi
 
 # Quick Start
 
-**Input file**: Time-series single cell RNA-seq data.
+**Input file**: Only expression matrix containing the time-series expression level as reads counts or normalized values for this developmental version.
 
-**Output file**: An inferenced cell trajectory.
+**Output file**: An inferenced cell states trajectory.
 
 1. Add new time-series single cell RNA-seq data.
 
@@ -39,20 +46,17 @@ CStreet is a python script (python 3.6 or higher) for cell trajectory constructi
    import numpy as np
    import pandas as pd
    # Read single cell data as DataFrame
-   data_t1=pd.read_table('/PATH/data_t1.txt',header=0, sep="\t",index_col=0)
-   data_t1=pd.read_table('/PATH/data_t2.txt',header=0, sep="\t",index_col=0)
-   data_t2=pd.read_table('/PATH/data_t3.txt',header=0, sep="\t",index_col=0)
-   data_t3=pd.read_table('/PATH/data_t4.txt',header=0, sep="\t",index_col=0)
+   data_t1=pd.read_table('data_t1.txt',header=0, sep="\t",index_col=0) 
+   data_t1=pd.read_table('data_t2.txt',header=0, sep="\t",index_col=0)
+   data_t2=pd.read_table('data_t3.txt',header=0, sep="\t",index_col=0)
+   data_t3=pd.read_table('data_t4.txt',header=0, sep="\t",index_col=0)
    # Create a new CStreet object
    cdata=CStreetData()
    # add data into CStreet object
    cdata.add_new_timepoint_scdata(data_t1)
    cdata.add_new_timepoint_scdata(data_t2)
    cdata.add_new_timepoint_scdata(data_t3)
-   
    ```
-
-   
 
 2. Customize parameters.
 
