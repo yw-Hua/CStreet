@@ -1022,7 +1022,7 @@ class CStreetData(object):
             
             #pos2
             nodes=nx.draw_networkx_nodes(G, pos2, ax=ax, node_size=1500, node_color=CCCOLOR[timepoint], alpha=1)
-            nodes.set_zorder((ZORDER+0.02)*timepoint)
+            nodes.set_zorder((ZORDER+0.05)*timepoint)
             nx.draw_networkx_labels(G, pos2,labels, ax=ax, font_size=20, font_color="white",font_weight="bold")
             nx.draw_networkx_labels(G, pos3,labels2,horizontalalignment="left", ax=ax, font_size=30)
         
