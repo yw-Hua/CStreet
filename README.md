@@ -12,6 +12,7 @@ CStreet is a python script (python 3.6 or higher) for cell states trajectory con
    $ pip3 install anndata
    $ pip3 install networkx
    $ pip3 install fa2
+   $ pip3 install retrying
    ```
 
 2. Download CStreet from github
@@ -61,32 +62,35 @@ CStreet is a python script (python 3.6 or higher) for cell states trajectory con
 2. Customize parameters.
 
    ```python
-   # Cell cluster
-   cdata.params['cell_cluster'] = True
-   cdata.params['cell_cluster_pca_n'] = 10
-   cdata.params['cell_cluster_knn_n'] = 15
-   cdata.params['cell_cluster_resolution'] = 1
-   # Filter genes and cells
-   cdata.params['filter_dead_cell'] = True
-   cdata.params['percent_mito_cutoff'] = 0.2
-   cdata.params['filter_lowcell_gene'] = True
-   cdata.params['min_cells'] = 3
-   cdata.params['filter_lowgene_cells'] = True
-   cdata.params['min_genes'] = 200
-   # Data normalize
-   cdata.params['normalize'] = True
-   cdata.params['normalize_base'] = 10000
-   cdata.params['log_transform'] = True
-   # Get highly variable genes
-   cdata.params['highly_variable_genes'] = False
-   # Set PCA and kNN
-   cdata.params['inner_graph_pca_n'] = 10
-   cdata.params['inner_graph_knn_n'] = 15
-   cdata.params['link_graph_pca_n'] = 10
-   cdata.params['link_graph_knn_n'] = 15
-   # Draw trajectory
-   cdata.params['max_outgoing'] = 10
-   cdata.params['min_score'] = 0.1
+   #Step1:cell_cluster
+   cdata.params.cell_cluster_pca_n=10
+   cdata.params.cell_cluster_knn_n=15
+   cdata.params.cell_cluster_resolution=0.1
+   
+   #Step2:gene and cell filter
+   cdata.params.filter_dead_cell=True
+   cdata.params.percent_mito_cutoff=0.2
+   cdata.params.filter_lowcell_gene=True
+   cdata.params.min_cells=3
+   cdata.params.filter_lowgene_cells=True
+   cdata.params.min_genes=200
+   
+   #Step3:normalize
+   cdata.params.normalize=True
+   cdata.params.normalize_base=10000
+   cdata.params.log_transform=True
+   
+   #Step4:get HVG
+   cdata.params.highly_variable_genes=False
+   
+   #Step5:get_graph
+   cdata.params.inner_graph_pca_n=10
+   cdata.params.inner_graph_knn_n=15
+   cdata.params.link_graph_pca_n=10
+   cdata.params.link_graph_knn_n=15
+   cdata.params.max_outgoing=10
+   cdata.params.min_score=0.1
+   cdata.params.min_cell_number=50
    ```
 
 3. Run CStreet
