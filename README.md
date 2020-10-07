@@ -105,4 +105,4 @@ CStreet is a python script (python 3.6 or higher) for cell states trajectory con
 
 **An example of inferenced cell trajectory**:
 
-![results.png](https://github.com/yw-Hua/MarkdownPicture/blob/master/CStreet/results.png?raw=true)
+![results.png](https://github.com/yw-Hua/MarkdownPicture/blob/master/CStreet/results2.png?raw=true)
