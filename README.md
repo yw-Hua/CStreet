@@ -4,26 +4,24 @@ CStreet is a python script (python 3.6 or higher) for cell states trajectory con
 
 # Installation
 
-1. Prepare required packages
-   CStreet depends on a number of `python3` packages available on pypi and all dependencies can be installed using  `pip3` commands :
+1. Install CStreet by `pip3`
+
+   CStreet can be installed directly by using  `pip3` commands :
 
    ```shell
-   $ pip3 install scanpy
-   $ pip3 install anndata
-   $ pip3 install networkx
-   $ pip3 install fa2
-   $ pip3 install retrying
+   $ pip3 install cstreet
    ```
 
 2. Download CStreet from github
-   CStreet can be download using `git` command:
+
+   CStreet can be also download by using `git` command :
 
    ```shell
    $ cd /PATH/ # here you can replace "/PATH/" with any location you want
    $ git clone git://github.com/TongjiZhanglab/CStreet.git
    ```
 
-3. Import the main class
+   And CStreet should be imported into your python script :
 
    ```python
    import sys
@@ -44,7 +42,7 @@ CStreet is a python script (python 3.6 or higher) for cell states trajectory con
 1. Add new time-series single cell RNA-seq data.
 
    ```python
-   import numpy as np
+   from cstreet import *
    import pandas as pd
    # Read single cell data as DataFrame
    data_t1=pd.read_table('data_t1.txt',header=0, sep="\t",index_col=0) 
@@ -106,3 +104,4 @@ CStreet is a python script (python 3.6 or higher) for cell states trajectory con
 **An example of inferenced cell trajectory**:
 
 ![results.png](https://github.com/yw-Hua/MarkdownPicture/blob/master/CStreet/results2.png?raw=true)
+
