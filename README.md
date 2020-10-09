@@ -46,9 +46,8 @@ CStreet is a python script (python 3.6 or higher) for cell states trajectory con
    import pandas as pd
    # Read single cell data as DataFrame
    data_t1=pd.read_table('data_t1.txt',header=0, sep="\t",index_col=0) 
-   data_t1=pd.read_table('data_t2.txt',header=0, sep="\t",index_col=0)
-   data_t2=pd.read_table('data_t3.txt',header=0, sep="\t",index_col=0)
-   data_t3=pd.read_table('data_t4.txt',header=0, sep="\t",index_col=0)
+   data_t2=pd.read_table('data_t2.txt',header=0, sep="\t",index_col=0)
+   data_t3=pd.read_table('data_t3.txt',header=0, sep="\t",index_col=0)
    # Create a new CStreet object
    cdata=CStreetData()
    # add data into CStreet object
