@@ -1,5 +1,4 @@
 # CStreet Overview
-
 CStreet is a python script (python 3.6 or higher) for cell states trajectory construction by using *k*-nearest neighbors graph algorithm for time-series single-cell RNA-seq data. It is a **developmental version**.
 
 # Installation
@@ -12,24 +11,6 @@ CStreet is a python script (python 3.6 or higher) for cell states trajectory con
    $ pip3 install cstreet
    ```
 
-2. Download CStreet from github
-
-   CStreet can be also download by using `git` command :
-
-   ```shell
-   $ cd /PATH/ # here you can replace "/PATH/" with any location you want
-   $ git clone git://github.com/TongjiZhanglab/CStreet.git
-   ```
-
-   And CStreet should be imported into your python script :
-
-   ```python
-   import sys
-   sys.path.append("/PATH/CStreet/") # here you should replace "/PATH/" with the location where CStreet has been installed at
-   from cstreet import *
-   ```
-
-   
 
 
 
@@ -55,11 +36,16 @@ CStreet is a python script (python 3.6 or higher) for cell states trajectory con
    cdata.add_new_timepoint_scdata(data_t2)
    cdata.add_new_timepoint_scdata(data_t3)
    ```
-
+   
 2. Customize parameters.
 
    ```python
-   #Step1:cell_cluster
+   #Step0:basic parameters
+   cdata.params.output_dir="./"
+   cdata.params.output_name="cstreet_project"
+   
+   
+   #Step1:cell cluster
    cdata.params.cell_cluster_pca_n=10
    cdata.params.cell_cluster_knn_n=15
    cdata.params.cell_cluster_resolution=0.1
@@ -80,7 +66,7 @@ CStreet is a python script (python 3.6 or higher) for cell states trajectory con
    #Step4:get HVG
    cdata.params.highly_variable_genes=False
    
-   #Step5:get_graph
+   #Step5:get graph
    cdata.params.inner_graph_pca_n=10
    cdata.params.inner_graph_knn_n=15
    cdata.params.link_graph_pca_n=10
