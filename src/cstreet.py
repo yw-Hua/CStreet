@@ -1,4 +1,5 @@
 #!python3.6
+import os
 import numpy as np
 import pandas as pd
 import scanpy as sc
@@ -12,72 +13,348 @@ import networkx as nx
 from fa2 import ForceAtlas2
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+from functools import wraps
+import time
+from datetime import datetime
+import traceback
+from retrying import retry
+import warnings
+
+warnings.filterwarnings("ignore")
 
 #定义cstreet对象
 
 class CStreetData(object):
     """docstring for CStreetData"""
-    params={
-    
-    #Step1:cell_cluster# 
-    
-    "cell_cluster":True,
-    "cell_cluster_pca_n":10,
-    "cell_cluster_knn_n":15,
-    "cell_cluster_resolution":1,
+    class params_object:
+        """docstring for params_object"""
+        __slots__=("__output_dir","__output_name","__cell_cluster_pca_n","__cell_cluster_knn_n","__cell_cluster_resolution",
+            "__filter_dead_cell","__percent_mito_cutoff","__filter_lowcell_gene","__min_cells","__filter_lowgene_cells",
+            "__min_genes","__normalize","__normalize_base","__log_transform","__highly_variable_genes",
+            "__inner_graph_pca_n","__inner_graph_knn_n","__link_graph_pca_n","__link_graph_knn_n",
+            "__max_outgoing","__min_score","__min_cell_number")
+        
+        def __init__(self):
+            #Step0:basic params#
+            self.__output_dir="./"
+            self.__output_name="cstreet_project"
+            #Step1:cell_cluster# 
+            self.__cell_cluster_pca_n=10
+            self.__cell_cluster_knn_n=15
+            self.__cell_cluster_resolution=1
 
-    #Step2:gene and cell filter#
+            #Step2:gene and cell filter#
+            self.__filter_dead_cell=True
+            self.__percent_mito_cutoff=0.2
+            
+            self.__filter_lowcell_gene=True
+            self.__min_cells=3
+            
+            self.__filter_lowgene_cells=True
+            self.__min_genes=200
+            
+            #Step3:normalize#
+            self.__normalize=True
+            self.__normalize_base=10000
+            self.__log_transform=True
 
-    "filter_dead_cell":True,
-    "percent_mito_cutoff":0.2,
-    
-    "filter_lowcell_gene":True,
-    "min_cells":3,
-    
-    "filter_lowgene_cells":True,
-    "min_genes":200,
-    
-    #Step3:normalize#
-    "normalize":True,
-    "normalize_base":10000,
-    "log_transform":True,
+            #Step4:get HVG#
+            self.__highly_variable_genes=False
 
-    #Step4:get HVG#
-    "highly_variable_genes":True,
+            #Step5:get_graph#
+            self.__inner_graph_pca_n=10
+            self.__inner_graph_knn_n=15
 
-    #Step5:get_graph#
-    "inner_graph_pca_n":10,
-    "inner_graph_knn_n":15,
+            self.__link_graph_pca_n=10
+            self.__link_graph_knn_n=15
 
-    "link_graph_pca_n":10,
-    "link_graph_knn_n":15,
+            #Step6:plot graph#
+            self.__max_outgoing=10
+            self.__min_score=0.1
+            self.__min_cell_number=50
+        
+        def __str__(self):
+            s=""
+            s+=f"\n#Step0:basic params# \n"
+            s+=f"output_dir={self.__output_dir}\n"
+            s+=f"output_name={self.__output_name}\n"            
+            
+            s+=f"\n#Step1:cell_cluster# \n"
+            s+=f"cell_cluster_pca_n={self.__cell_cluster_pca_n}\n"
+            s+=f"cell_cluster_knn_n={self.__cell_cluster_knn_n}\n"
+            s+=f"cell_cluster_resolution={self.__cell_cluster_resolution}\n"
 
-    #Step6:plot graph#
-    "max_outgoing":10,
-    "min_score":0.1
-    }
+            s+=f"\n#Step2:gene and cell filter#\n"
+            s+=f"filter_dead_cell={self.__filter_dead_cell}\n"
+            s+=f"percent_mito_cutoff={self.__percent_mito_cutoff}\n"
 
+            s+=f"filter_lowcell_gene={self.__filter_lowcell_gene}\n"
+            s+=f"min_cells={self.__min_cells}\n"
+
+            s+=f"filter_lowgene_cells={self.__filter_lowgene_cells}\n"
+            s+=f"min_genes={self.__min_genes}\n"
+
+            s+=f"\n#Step3:normalize#\n"
+            s+=f"normalize={self.__normalize}\n"
+            s+=f"normalize_base={self.__normalize_base}\n"
+            s+=f"log_transform={self.__log_transform}\n"
+
+            s+=f"\n#Step4:get HVG#\n"
+            s+=f"highly_variable_genes={self.__highly_variable_genes}\n"
+
+            s+=f"\n#Step5:get_graph#\n"
+            s+=f"inner_graph_pca_n={self.__inner_graph_pca_n}\n"
+            s+=f"inner_graph_knn_n={self.__inner_graph_knn_n}\n"
+
+            s+=f"link_graph_pca_n={self.__link_graph_pca_n}\n"
+            s+=f"link_graph_knn_n={self.__link_graph_knn_n}\n"
+
+            s+=f"\n#Step6:plot graph#\n"
+            s+=f"max_outgoing={self.__max_outgoing}\n"
+            s+=f"min_score={self.__min_score}\n"
+            s+=f"min_cell_number={self.__min_cell_number}\n"
+            return s
+        def __repr__(self):
+            return self.__str__()
+        @property
+        def output_dir(self):
+            return self.__output_dir
+        @output_dir.setter
+        def output_dir(self,value):
+            if not isinstance(value,str):
+                raise ValueError('output_dir must be a string')
+            if value[-1] != "/":
+                value+="/"
+            self.__output_dir = value
+
+        @property
+        def output_name(self):
+            return self.__output_name
+        @output_name.setter
+        def output_name(self,value):
+            if not isinstance(value,str):
+                raise ValueError('output_name must be a string')
+            self.__output_name = value
+
+        @property
+        def cell_cluster_pca_n(self):
+            return self.__cell_cluster_pca_n
+        @cell_cluster_pca_n.setter
+        def cell_cluster_pca_n(self,value):
+            if not isinstance(value,int):
+                raise ValueError('cell_cluster_pca_n must be an integer')
+            if value <= 0:
+                raise ValueError('cell_cluster_pca_n must be bigger than 0')
+            self.__cell_cluster_pca_n = value
+
+        @property
+        def cell_cluster_knn_n(self):
+            return self.__cell_cluster_knn_n
+        @cell_cluster_knn_n.setter
+        def cell_cluster_knn_n(self,value):
+            if not isinstance(value,int):
+                raise ValueError('cell_cluster_knn_n must be an integer')
+            if value <= 0:
+                raise ValueError('cell_cluster_knn_n must be bigger than 0')
+            self.__cell_cluster_knn_n = value
+
+        @property
+        def cell_cluster_resolution(self):
+            return self.__cell_cluster_resolution
+        @cell_cluster_resolution.setter
+        def cell_cluster_resolution(self,value):
+            if not isinstance(value,(int,float)):
+                raise ValueError('cell_cluster_resolution must be numeric')
+            if value <= 0:
+                raise ValueError('cell_cluster_resolution must be bigger than 0')        
+            self.__cell_cluster_resolution = value
+
+        @property
+        def filter_dead_cell(self):
+            return self.__filter_dead_cell
+        @filter_dead_cell.setter
+        def filter_dead_cell(self,value):
+            if not isinstance(value,bool):
+                raise ValueError('filter_dead_cell must be True or False')
+            self.__filter_dead_cell = value
+
+        @property
+        def percent_mito_cutoff(self):
+            return self.__percent_mito_cutoff
+        @percent_mito_cutoff.setter
+        def percent_mito_cutoff(self,value):
+            if not isinstance(value,(int,float)):
+                raise ValueError('percent_mito_cutoff must be numeric')
+            if value <= 0 or value >= 1:
+                raise ValueError('percent_mito_cutoff must be between 0.0 and 1.0') 
+            self.__percent_mito_cutoff = value
+
+        @property
+        def filter_lowcell_gene(self):
+            return self.__filter_lowcell_gene
+        @filter_lowcell_gene.setter
+        def filter_lowcell_gene(self,value):
+            if not isinstance(value,bool):
+                raise ValueError('filter_lowcell_gene must be True or False')
+            self.__filter_lowcell_gene = value
+
+        @property
+        def min_cells(self):
+            return self.__min_cells
+        @min_cells.setter
+        def min_cells(self,value):
+            if not isinstance(value,int):
+                raise ValueError('min_cells must be an integer')
+            if value <= 0:
+                raise ValueError('min_cells must be bigger than 0')
+            self.__min_cells = value
+
+        @property
+        def filter_lowgene_cells(self):
+            return self.__filter_lowgene_cells
+        @filter_lowgene_cells.setter
+        def filter_lowgene_cells(self,value):
+            if not isinstance(value,bool):
+                raise ValueError('filter_lowgene_cells must be True or False')
+            self.__filter_lowgene_cells = value
+
+        @property
+        def min_genes(self):
+            return self.__min_genes
+        @min_genes.setter
+        def min_genes(self,value):
+            if not isinstance(value,int):
+                raise ValueError('min_genes must be an integer')
+            if value <= 0:
+                raise ValueError('min_genes must be bigger than 0')
+            self.__min_genes = value
+
+        @property
+        def normalize(self):
+            return self.__normalize
+        @normalize.setter
+        def normalize(self,value):
+            if not isinstance(value,bool):
+                raise ValueError('normalize must be True or False')
+            self.__normalize = value
+
+        @property
+        def normalize_base(self):
+            return self.__normalize_base
+        @normalize_base.setter
+        def normalize_base(self,value):
+            if not isinstance(value,int):
+                raise ValueError('normalize_base must be an integer')
+            if value <= 0:
+                raise ValueError('normalize_base must be bigger than 0')
+            self.__normalize_base = value
+
+        @property
+        def log_transform(self):
+            return self.__log_transform
+        @log_transform.setter
+        def log_transform(self,value):
+            if not isinstance(value,bool):
+                raise ValueError('log_transform must be True or False')
+            self.__log_transform = value
+
+        @property
+        def highly_variable_genes(self):
+            return self.__highly_variable_genes
+        @highly_variable_genes.setter
+        def highly_variable_genes(self,value):
+            if not isinstance(value,bool):
+                raise ValueError('highly_variable_genes must be True or False')
+            self.__highly_variable_genes = value
+
+        @property
+        def inner_graph_pca_n(self):
+            return self.__inner_graph_pca_n
+        @inner_graph_pca_n.setter
+        def inner_graph_pca_n(self,value):
+            if not isinstance(value,int):
+                raise ValueError('inner_graph_pca_n must be an integer')
+            if value <= 0:
+                raise ValueError('inner_graph_pca_n must be bigger than 0')
+            self.__inner_graph_pca_n = value
+
+        @property
+        def inner_graph_knn_n(self):
+            return self.__inner_graph_knn_n
+        @inner_graph_knn_n.setter
+        def inner_graph_knn_n(self,value):
+            if not isinstance(value,int):
+                raise ValueError('inner_graph_knn_n must be an integer')
+            if value <= 0:
+                raise ValueError('inner_graph_knn_n must be bigger than 0')
+            self.__inner_graph_knn_n = value
+
+        @property
+        def link_graph_pca_n(self):
+            return self.__link_graph_pca_n
+        @link_graph_pca_n.setter
+        def link_graph_pca_n(self,value):
+            if not isinstance(value,int):
+                raise ValueError('link_graph_pca_n must be an integer')
+            if value <= 0:
+                raise ValueError('link_graph_pca_n must be bigger than 0')
+            self.__link_graph_pca_n = value
+
+        @property
+        def link_graph_knn_n(self):
+            return self.__link_graph_knn_n
+        @link_graph_knn_n.setter
+        def link_graph_knn_n(self,value):
+            if not isinstance(value,int):
+                raise ValueError('link_graph_knn_n must be an integer')
+            if value <= 0:
+                raise ValueError('link_graph_knn_n must be bigger than 0')
+            self.__link_graph_knn_n = value
+
+        @property
+        def max_outgoing(self):
+            return self.__max_outgoing
+        @max_outgoing.setter
+        def max_outgoing(self,value):
+            if not isinstance(value,int):
+                raise ValueError('max_outgoing must be be an integer')
+            if value <= 0:
+                raise ValueError('max_outgoing must be bigger than 0')
+            self.__max_outgoing = value
+
+        @property
+        def min_score(self):
+            return self.__min_score
+        @min_score.setter
+        def min_score(self,value):
+            if not isinstance(value,(int,float)):
+                raise ValueError('min_score must be numeric')
+            if value <= 0 or value >= 1:
+                raise ValueError('min_score must be between 0.0 and 1.0')  
+            self.__min_score = value
+
+        @property
+        def min_cell_number(self):
+            return self.__min_cell_number
+        @min_cell_number.setter
+        def min_cell_number(self,value):
+            if not isinstance(value,int):
+                raise ValueError('min_cell_number must be an integer')
+            if value <= 0:
+                raise ValueError('min_cell_number must be bigger than 0')
+            self.__min_cell_number = value
+
+    params=None
     timepoint_scdata_dict={}
     link_knn_graph=None
     link_cluster_graph=None
-    all_cluster_node=None
+    filtered_cluster_node=None
     link_G=None
-    __timepoint_scdata_num=0
+    __timepoint_scdata_num=1
 
     def __init__(self): 
         super(CStreetData, self).__init__()
-        
-    def add_new_timepoint_scdata(self,timepoint_scdata,timepoint_scdata_cluster=None):
-        self.timepoint_scdata_dict[self.__timepoint_scdata_num]=ad.AnnData(pd.DataFrame(timepoint_scdata))
-        if timepoint_scdata_cluster != None:
-            self.timepoint_scdata_dict[self.__timepoint_scdata_num].obs["scdata_cluster"]=[f"timepoint{self.__timepoint_scdata_num}_{c}" for c in list(timepoint_scdata_cluster)]
-
-            self.timepoint_scdata_dict[self.__timepoint_scdata_num].uns["cluster_flag"]=True
-        else:
-            self.timepoint_scdata_dict[self.__timepoint_scdata_num].obs["scdata_cluster"]=[0]*self.timepoint_scdata_dict[self.__timepoint_scdata_num].n_obs
-            self.timepoint_scdata_dict[self.__timepoint_scdata_num].uns["cluster_flag"]=False
-        self.__timepoint_scdata_num+=1
-
+        self.params=self.params_object()
     def __str__(self):
         s=""
         for (timepoint,adata) in self.timepoint_scdata_dict.items():
@@ -88,47 +365,136 @@ class CStreetData(object):
         for (timepoint,adata) in self.timepoint_scdata_dict.items():
             s+=f"timepoint:{timepoint}\n{adata}\n\n"
         return s
+    # 定义装饰器
+    def function_timer(function):
+        @wraps(function)
+        def function_timer(*args, **kwargs):
+            print(f'\n[Function: {function.__name__} start...]\n')
+            t0 = time.time()
+            result = function(*args, **kwargs)
+            t1 = time.time()
+            print(f'\n[Function: {function.__name__} finished, spent time: {(t1 - t0):.2f}s]\n')
+            print('='*80)
+            return result
+        return function_timer
 
+    def except_output(function):
+        @wraps(function)
+        def execept_raise(*args, **kwargs):
+            try:
+                return function(*args, **kwargs)
+            except Exception as e:
+                sign = '=' * 80 + '\n'
+                print(f'{sign}>>>Error Time:\t{datetime.now()}\n>>>Error Func:\t{function.__name__}\n>>>Error Info:\t{e}')
+                print(f'{sign}{traceback.format_exc()}{sign}')
+                raise e
+        return execept_raise
+
+    def params_filter(params_list):
+        def params_filter(function):
+            @wraps(function)
+            def wrapper(*args, **kwargs):
+                kwargs_filter={}
+                for k, v in kwargs.items():
+                    if k not in params_list:
+                        print(f"Parameter '{k}' is invalid ,and it will be ignored.\n")
+                    else:
+                        kwargs_filter[k]=v
+                return function(*args, **kwargs_filter)
+            return wrapper
+        return params_filter
+    
+    # 定义类方法
+    @except_output
+    @params_filter(["timepoint_scdata","timepoint_scdata_cluster"])
+    def add_new_timepoint_scdata(self,timepoint_scdata,timepoint_scdata_cluster=None):
+        data=pd.DataFrame(timepoint_scdata)
+        data=data.fillna(0)
+        self.timepoint_scdata_dict[self.__timepoint_scdata_num]=ad.AnnData(data)
+        if timepoint_scdata_cluster != None:
+            self.timepoint_scdata_dict[self.__timepoint_scdata_num].obs["scdata_cluster"]=[f"timepoint{self.__timepoint_scdata_num}_{c}" for c in list(timepoint_scdata_cluster)]
+
+            self.timepoint_scdata_dict[self.__timepoint_scdata_num].uns["cluster_flag"]=True
+        else:
+            self.timepoint_scdata_dict[self.__timepoint_scdata_num].obs["scdata_cluster"]=[0]*self.timepoint_scdata_dict[self.__timepoint_scdata_num].n_obs
+            self.timepoint_scdata_dict[self.__timepoint_scdata_num].uns["cluster_flag"]=False
+        self.__timepoint_scdata_num+=1
+    
+    def __create_folder(self,folder_name):
+        output_dir = self.params.output_dir
+        output_name = self.params.output_name
+        if not os.path.exists(output_dir):
+            raise ValueError(f'{output_dir} : No such directory')
+        elif not os.path.exists(output_dir+output_name):
+            os.makedirs(output_dir+output_name)
+        else:
+            print(f"{output_dir+output_name} exists !")
+
+        if not os.path.exists(output_dir+output_name+"/"+folder_name):
+            os.makedirs(output_dir+output_name+"/"+folder_name)
+        else:
+            print(f"{output_dir+output_name+'/'+folder_name} exists !")
+
+
+
+    @except_output
+    @function_timer
+    @params_filter(['pca_n','knn_n','resolution'])
     def cell_clusters(self,**kwargs):
 
-        pca_n = kwargs.setdefault('pca_n', self.params["cell_cluster_pca_n"])
-        knn_n=kwargs.setdefault('knn_n', self.params["cell_cluster_knn_n"])
-        resolution=kwargs.setdefault("resolution",self.params["cell_cluster_resolution"])
+        self.__create_folder("figures")
 
+        pca_n = self.params.cell_cluster_pca_n = kwargs.setdefault('pca_n', self.params.cell_cluster_pca_n)
+        knn_n = self.params.cell_cluster_knn_n = kwargs.setdefault('knn_n', self.params.cell_cluster_knn_n)
+        resolution = self.params.cell_cluster_resolution=kwargs.setdefault("resolution",self.params.cell_cluster_resolution)
+        
         for (timepoint,adata) in self.timepoint_scdata_dict.items():
             print(f"timepoint:{timepoint}")
             if adata.uns['cluster_flag'] :
-                print(f"clusters have been given.")
-                continue
-            adata_copy=adata.copy()
-            adata_copy.obs_names_make_unique()
-            adata_copy.var_names_make_unique()
-            # MT pct
-            mito_genes = adata_copy.var_names.str.startswith('MT-')
-            adata_copy.obs['percent_mito'] = np.sum(adata_copy[:, mito_genes].X, axis=1) / np.sum(adata_copy.X, axis=1)
-            adata_copy.obs['n_counts'] = adata_copy.X.sum(axis=1)
-            # normalize log-transform
-            sc.pp.normalize_per_cell(adata_copy, counts_per_cell_after=1e4)
-            sc.pp.log1p(adata_copy)
-            # high variable genes
-            sc.pp.highly_variable_genes(adata_copy, min_mean=0.0125, max_mean=3, min_disp=0.5)
-            adata_high = adata_copy[:, adata_copy.var['highly_variable']]
-            # linear regression
-            sc.pp.regress_out(adata_high, ['n_counts', 'percent_mito'])
-            sc.pp.scale(adata_high, max_value=10)
-            # pca
-            sc.tl.pca(adata_high, n_comps=pca_n, svd_solver='arpack')
-            # knn
-            sc.pp.neighbors(adata_high, n_neighbors=knn_n, n_pcs=pca_n)
-            sc.tl.louvain(adata_high, resolution=resolution)
-            sc.tl.umap(adata_high)
-            sc.pl.umap(adata_high, color='louvain')
-            adata.obs["scdata_cluster"]=[f"timepoint{timepoint}_cluster{c}" for c in adata_high.obs["louvain"].tolist()]
-            adata.uns["cluster_flag"]=True
+                print(f"clusters have been given")
+            else:
+                adata_copy=adata.copy()
+                adata_copy.obs_names_make_unique()
+                adata_copy.var_names_make_unique()
+                # MT pct
+                mito_genes = adata_copy.var_names.str.startswith('MT-')
+                adata_copy.obs['percent_mito'] = np.sum(adata_copy[:, mito_genes].X, axis=1) / np.sum(adata_copy.X, axis=1)
+                adata_copy.obs['n_counts'] = adata_copy.X.sum(axis=1)
+                # normalize log-transform
+                sc.pp.normalize_per_cell(adata_copy, counts_per_cell_after=1e4)
+                sc.pp.log1p(adata_copy)
+                # high variable genes
+                sc.pp.highly_variable_genes(adata_copy, min_mean=0.0125, max_mean=3, min_disp=0.5)
+                adata_high = adata_copy[:, adata_copy.var['highly_variable']]
+                # linear regression
+                sc.pp.regress_out(adata_high, ['n_counts', 'percent_mito'])
+                sc.pp.scale(adata_high, max_value=10)
+                # pca
+                sc.tl.pca(adata_high, n_comps=pca_n, svd_solver='arpack')
+                # knn
+                sc.pp.neighbors(adata_high, n_neighbors=knn_n, n_pcs=pca_n)
+                sc.tl.louvain(adata_high, resolution=resolution)
+                sc.tl.umap(adata_high)
+                fig=sc.pl.umap(adata_high, color='louvain',return_fig=True)
+                plt.show()
+                ouput_path=self.params.output_dir+self.params.output_name+"/figures/"
+                fig.savefig(ouput_path+f"timepoint{timepoint}_louvain_umap.pdf", bbox_inches='tight')
 
+                adata.obs["scdata_cluster"]=[f"timepoint{timepoint}_cluster{int(c)+1}" for c in adata_high.obs["louvain"].tolist()]
+                adata.uns["cluster_flag"]=True
+            # 按字符串排序
+            node_cluster=adata.obs["scdata_cluster"]
+            #node_cluster.index=adata.obs["cell_id"]
+            cluster_set=node_cluster.unique().tolist()
+            cluster_set.sort()
+            adata.uns["cluster_set"]=cluster_set
+            adata.uns["cluster_counts"]=node_cluster.value_counts()
 
+    @except_output
+    @function_timer
+    @params_filter(["percent_mito_cutoff"])
     def filter_dead_cell(self,**kwargs):
-        percent_mito_cutoff=kwargs.setdefault("percent_mito_cutoff",self.params["percent_mito_cutoff"])
+        percent_mito_cutoff=self.params.percent_mito_cutoff=kwargs.setdefault("percent_mito_cutoff",self.params.percent_mito_cutoff)
 
         for (timepoint,adata) in self.timepoint_scdata_dict.items():
             adata.var['mt'] = adata.var_names.str.startswith('MT-')  # annotate the group of mitochondrial genes as 'mt'
@@ -142,8 +508,11 @@ class CStreetData(object):
             print(f'filtered out {raw_cell_num-filter_cell_num} cells that are detected in more than {percent_mito_cutoff} mito percent')
             print()
 
+    @except_output
+    @function_timer
+    @params_filter(["min_cells"])
     def filter_lowcell_gene(self,**kwargs):
-        min_cells=kwargs.setdefault("min_cells",self.params["min_cells"])
+        min_cells=self.params.min_cells=kwargs.setdefault("min_cells",self.params.min_cells)
         for (timepoint,adata) in self.timepoint_scdata_dict.items():
             raw_gene_num=adata.n_vars
             sc.pp.filter_genes(adata, min_cells=min_cells)
@@ -151,8 +520,12 @@ class CStreetData(object):
             print(f'timepoint:{timepoint}')
             print(f'filtered out {raw_gene_num-filter_gene_num} genes that are detected in less than {min_cells} cells')
             print()
+    
+    @except_output
+    @function_timer
+    @params_filter(["min_genes"])
     def filter_lowgene_cells(self,**kwargs):
-        min_genes=kwargs.setdefault("min_genes",self.params["min_genes"])
+        min_genes=self.params.min_genes=kwargs.setdefault("min_genes",self.params.min_genes)
 
         for (timepoint,adata) in self.timepoint_scdata_dict.items():
             raw_cell_num=adata.n_obs
@@ -162,16 +535,23 @@ class CStreetData(object):
             print(f'filtered out {raw_cell_num-filter_cell_num} cells that are detected in less than {min_genes} genes')
             print()
 
+    @except_output
+    @function_timer
+    @params_filter(["normalize_base"])
     def normalize_data(self,**kwargs):
-        normalize_base=kwargs.setdefault("normalize_base",self.params["normalize_base"])
+        normalize_base=self.params.normalize_base=kwargs.setdefault("normalize_base",self.params.normalize_base)
         print(f'Normalize data to {normalize_base} count ...')
         for (timepoint,adata) in self.timepoint_scdata_dict.items():
             sc.pp.normalize_total(adata,target_sum=normalize_base)
 
+    @except_output
+    @function_timer
     def log_transform(self):
         for (timepoint,adata) in self.timepoint_scdata_dict.items():
             sc.pp.log1p(adata)
 
+    @except_output
+    @function_timer
     def highly_variable_genes(self):
         min_exp = 0
         min_exp_cnt = 10
@@ -262,9 +642,13 @@ class CStreetData(object):
             hv_gene_num=self.timepoint_scdata_dict[timepoint].n_vars
             print(f"filtered out {hv_gene_num} highly variable genes")
             print()
+    
+    @except_output
+    @function_timer
+    @params_filter(["pca_n","k"])
     def get_knn_inner(self,**kwargs):
-        pca_n=kwargs.setdefault("pca_n",self.params["inner_graph_pca_n"])
-        k=kwargs.setdefault("k",self.params["inner_graph_knn_n"])
+        pca_n=self.params.inner_graph_pca_n=kwargs.setdefault("pca_n",self.params.inner_graph_pca_n)
+        k=self.params.inner_graph_knn_n=kwargs.setdefault("k",self.params.inner_graph_knn_n)
 
         for (timepoint,adata) in self.timepoint_scdata_dict.items():
             print(f"timepoint:{timepoint}")
@@ -294,9 +678,12 @@ class CStreetData(object):
             adata.obsm['inner_distance']=adj
             print()
 
+    @except_output
+    @function_timer
+    @params_filter(["pca_n","k"])
     def get_knn_link(self,**kwargs):
-        pca_n=kwargs.setdefault("pca_n",self.params["link_graph_pca_n"])
-        k=kwargs.setdefault("k",self.params["link_graph_knn_n"])
+        pca_n=self.params.link_graph_pca_n=kwargs.setdefault("pca_n",self.params.link_graph_pca_n)
+        k=self.params.link_graph_knn_n=kwargs.setdefault("k",self.params.link_graph_knn_n)
         for timepoint in list(self.timepoint_scdata_dict.keys())[:-1]:
             print(f"timepoint between {timepoint} and {timepoint+1} ")
 
@@ -344,6 +731,8 @@ class CStreetData(object):
             adata_end.obsm["link_previous_ind"]=adata_start.obs["cell_id"][ind[:, 1:]]
             adata_end.obsm['link_previous_distance']=adj
 
+    @except_output
+    @function_timer
     def get_knn_graph(self):
         #inner graph
         for (timepoint,adata) in self.timepoint_scdata_dict.items():
@@ -399,6 +788,8 @@ class CStreetData(object):
                 })
             adata_end.uns['link_previous_knn_graph']=df_graph
 
+    @except_output
+    @function_timer
     def filter_knn_graph(self):
         knn_graph=pd.DataFrame()
         #inner graph
@@ -460,7 +851,8 @@ class CStreetData(object):
         knn_graph=adata.uns["inner_knn_graph"]
         node_cluster=adata.obs["scdata_cluster"]
         node_cluster.index=adata.obs["cell_id"]
-        adata.uns["cluster_set"]=node_cluster.unique()
+
+
         knn_graph.loc[:,'Node1_cluster'] = knn_graph.loc[:,'Node1'].map(node_cluster.to_dict())
         knn_graph.loc[:,'Node2_cluster'] = knn_graph.loc[:,'Node2'].map(node_cluster.to_dict())
         #去除相同类型的细胞之间的连接
@@ -508,6 +900,8 @@ class CStreetData(object):
 
         return knn_graph_egde
 
+    @except_output
+    @function_timer
     def get_cluster_trajectory(self):
         #inner graph
         node_cluster=pd.DataFrame()
@@ -524,15 +918,20 @@ class CStreetData(object):
 
         self.cluster_graph=knn_graph_egde.sort_values(by='score',ascending=False).reset_index(drop=True)
 
-    def __get_nxG(self,knn_graph_egde, allnodes):
+    def __get_nxG(self,knn_graph_egde, allnodes,min_score):
         G=nx.DiGraph()
         for node in allnodes:
             G.add_node(node,timepoint=str(node).split("_")[0])
         for index,row in knn_graph_egde.iterrows():
-            G.add_edge(row["Node1_cluster"],row["Node2_cluster"],score=row["score"],start_timepoint=G.nodes[row["Node1_cluster"]]["timepoint"])
+            if (row["Node1_cluster"] in allnodes) & (row["Node2_cluster"] in allnodes) & (row["score"]>min_score) :
+                G.add_edge(row["Node1_cluster"],row["Node2_cluster"],score=row["score"],start_timepoint=G.nodes[row["Node1_cluster"]]["timepoint"])
         return G
 
-    def __force_directed_layout(self,G,verbose=True, iterations=50):
+    def if_ZeroDivisionError(exception):
+        return isinstance(exception, ZeroDivisionError)
+
+    @retry(retry_on_exception=if_ZeroDivisionError)
+    def __force_directed_layout(self,G,timepoint,verbose=True, iterations=50):
         """" Function to compute force directed layout from the G
         :param G: networkx graph object converted from sparse matrix representing affinities between cells
         :param cell_names: pandas Series object with cell names
@@ -575,55 +974,74 @@ class CStreetData(object):
         ## plot KNN graph
         f = plt.figure(figsize=(20,15))
         ax=f.add_subplot(111)
-        ax.set(xlim=[-1, 11],ylim=[-1, 11],title='An Example Axes')
+        ax.set(xlim=[-1, 11],ylim=[-1, 11],title='ForceAtlas')
         nx.draw_networkx_nodes(G, positions, ax=ax, node_size=800, node_color="blue", alpha=0.5)
         nx.draw_networkx_edges(G, positions, ax=ax, width=10,edge_color="green", alpha=0.5)
         nx.draw_networkx_labels(G, positions, ax=ax, font_size=20)
+        plt.tight_layout()
         plt.show()
-        #f.savefig(pdf_name, bbox_inches='tight')
+
+        ouput_path=self.params.output_dir+self.params.output_name+"/figures/"
+        f.savefig(ouput_path+f"timepoint{timepoint}_fa.pdf", bbox_inches='tight')
 
         return positions
 
-    def get_knn_nxG(self):
-        all_node_cluster=np.array([])
+    @except_output
+    @function_timer
+    @params_filter(["topN","min_score","min_cell_number"])
+    def get_knn_nxG(self,**kwargs):
+        topN=self.params.max_outgoing=kwargs.setdefault("topN",self.params.max_outgoing)
+        min_score=self.params.min_score=kwargs.setdefault("min_score",self.params.min_score)
+        min_cell_number=self.params.min_cell_number=kwargs.setdefault("min_cell_number",self.params.min_cell_number)
+
+        filtered_node_cluster=np.array([])
         for (timepoint,adata) in self.timepoint_scdata_dict.items():
             print(f"timepoint:{timepoint}")
             knn_graph_egde=adata.uns['cluster_graph'].loc[:,["Node1_cluster","Node2_cluster","score"]]
             allnodes=adata.uns["cluster_set"]
-            all_node_cluster=np.hstack([all_node_cluster,allnodes])
+            allnodes_counts=adata.uns["cluster_counts"]
+            filtered_nodes=[node for node in allnodes if allnodes_counts[node]>min_cell_number]
+
+            filtered_node_cluster=np.hstack([filtered_node_cluster,filtered_nodes])
             
-            inner_G = self.__get_nxG(knn_graph_egde, allnodes).to_undirected()
+            inner_G = self.__get_nxG(knn_graph_egde, filtered_nodes,min_score).to_undirected()
             adata.uns["inner_G"]=inner_G
             
-            fa_cord_all = self.__force_directed_layout(G=inner_G)
+            fa_cord_all = self.__force_directed_layout(G=inner_G,timepoint=timepoint)
             adata.uns["fa_cord"]=fa_cord_all
 
-        knn_graph_egde=self.cluster_graph
-        self.all_cluster_node=all_node_cluster
-        link_G=self.__get_nxG(knn_graph_egde, all_node_cluster)
+        knn_graph_egde=self.cluster_graph.groupby(["Node1_cluster"],as_index=False).head(topN)
+        self.filtered_cluster_node=filtered_node_cluster
+        link_G=self.__get_nxG(knn_graph_egde, filtered_node_cluster,min_score)
         self.link_G=link_G
     
+    @except_output
+    @function_timer
+    #@params_filter()
     def draw_nxG(self,**kwargs):
-        topN=kwargs.setdefault("",self.params["max_outgoing"])
-        min_score=kwargs.setdefault("min_score",self.params["min_score"])
 
-        TRANS=16 
-        sq=np.array([[-2.5,12.5],[12.5,12.5],[12.5,-2.5],[-2.5,-2.5],[-2.5,12.5]]).T
+        ZORDER=0.1
+        TRANS=25 
+        SQ=np.array([[-2.5,12.5],[12.5,12.5],[12.5,-2.5],[-2.5,-2.5],[-2.5,12.5]]).T
         T=np.array([[1,0],[1,1.5]])
-        sq=T@sq
-        hhcolor=["orangered","green","red","orangered","red","green"]
-
-        fig = plt.figure(figsize=(40,60))
+        SQ=T@SQ
+        CCCOLOR=["#CE0013","#C7A609","#87C232","#008792","#A14C94","#15A08C","#8B7E75","#1E7CAF","#EA425F","#46489A","#E50033","#0F231F","#1187CD","#16557A"]
+        number_of_scdata=len(self.timepoint_scdata_dict)
+        fig = plt.figure(figsize=(number_of_scdata*10,30))
         ax = fig.add_subplot(1,1,1)
         all_pos={}
         all_pos2={}
         for (timepoint,adata) in self.timepoint_scdata_dict.items():
             
-            ax.fill(sq[0]+TRANS*timepoint,sq[1],facecolor="gray",edgecolor='black',lw=3,alpha=0.55,zorder=timepoint)
+            ax.fill(SQ[0]+TRANS*timepoint,SQ[1],facecolor="#979a9a",edgecolor='gray',lw=3,alpha=0.65,zorder=ZORDER*timepoint)
+            ax.plot(SQ[0]+TRANS*timepoint,SQ[1],'black',lw=3,zorder=ZORDER*timepoint)
+            plt.text(5+TRANS*timepoint,-5, f'$ t_{timepoint} $',size=40, color="black",weight="bold",verticalalignment="center",horizontalalignment="center")
+            
             G=adata.uns["inner_G"]
             pos=adata.uns["fa_cord"].copy()
             pos2={}
             pos3={}
+            pos4={}
             width_list=[]
             for (u, v, wt) in G.edges.data('score'):
                 width_list.append(wt*5)
@@ -640,31 +1058,31 @@ class CStreetData(object):
                 
             labels={}
             labels2={}
-            for i,nodes in enumerate(adata.uns["cluster_set"]):
-                labels[nodes]=str(i)
+            for i,nodes in enumerate(list(G.nodes())):
+                labels[nodes]=str(i+1)
                 labels2[nodes]=str(nodes).split("_")[1]
-                pos2[nodes]=(5+TRANS*timepoint,np.linspace(-10,-70,G.number_of_nodes())[i])
-                pos3[nodes]=(5+TRANS*timepoint,np.linspace(-10,-70,G.number_of_nodes())[i]-2)
-            all_pos2={**all_pos2,**pos2}
+                x_pos=TRANS*timepoint-2
+                y_pos=np.linspace(-10,-60,(G.number_of_nodes()+2))[1:-1][i]
+                pos2[nodes]=(x_pos,y_pos)
+                pos3[nodes]=(x_pos+1,y_pos)
+                pos4[nodes]=(x_pos-0.3,y_pos)
+            all_pos2={**all_pos2,**pos4}
             all_pos={**all_pos,**pos}
             #pos
-            nodes=nx.draw_networkx_nodes(G, pos, ax=ax, node_size=800, node_color=hhcolor[timepoint], alpha=1)
-            nodes.set_zorder(timepoint+0.5)
+            nodes=nx.draw_networkx_nodes(G, pos, ax=ax, node_size=800, node_color=CCCOLOR[timepoint], alpha=1)
+            nodes.set_zorder((ZORDER+0.05)*timepoint)
             edges=nx.draw_networkx_edges(G, pos, ax=ax, width=width_list,edge_color="black", alpha=1)
             if G.number_of_edges() != 0:
-                edges.set_zorder(timepoint+0.15)
-            nx.draw_networkx_labels(G, pos,labels, ax=ax, font_size=20)
+                edges.set_zorder((ZORDER+0.015)*timepoint)
+            nx.draw_networkx_labels(G, pos,labels, ax=ax, font_size=20, font_color="white",font_weight="bold")
+            
             #pos2
-            nodes=nx.draw_networkx_nodes(G, pos2, ax=ax, node_size=1200, node_color=hhcolor[timepoint], alpha=1)
-            nodes.set_zorder(timepoint+0.5)
-            nx.draw_networkx_labels(G, pos2,labels, ax=ax, font_size=20)
-            nx.draw_networkx_labels(G, pos3,labels2,verticalalignment="bottom", ax=ax, font_size=30)
-
-        knn_graph_egde=self.cluster_graph.groupby(["Node1_cluster"],as_index=False).head(topN)
-        knn_graph_egde=knn_graph_egde.loc[knn_graph_egde["score"]>=min_score,:]
-
-        all_node_cluster=self.all_cluster_node
-        link_G=self.__get_nxG(knn_graph_egde, all_node_cluster)
+            nodes=nx.draw_networkx_nodes(G, pos2, ax=ax, node_size=1500, node_color=CCCOLOR[timepoint], alpha=1)
+            nodes.set_zorder((ZORDER+0.05)*timepoint)
+            nx.draw_networkx_labels(G, pos2,labels, ax=ax, font_size=20, font_color="white",font_weight="bold")
+            nx.draw_networkx_labels(G, pos3,labels2,horizontalalignment="left", ax=ax, font_size=30)
+        
+        link_G=self.link_G
 
         width_list=[]
         for (u, v, wt) in link_G.edges.data('score'):
@@ -672,69 +1090,56 @@ class CStreetData(object):
         timepoint_list=[]
         for (u, v, tp) in link_G.edges.data('start_timepoint'):
             timepoint_list.append(tp)    
-        link_edges=nx.draw_networkx_edges(link_G, all_pos, ax=ax,width=width_list,edge_color="blue",arrowstyle="->", arrowsize=25,alpha=1)
+        link_edges=nx.draw_networkx_edges(link_G, all_pos, ax=ax,width=width_list,edge_color="#0060A8",arrowstyle="->", arrowsize=50,alpha=1)
         for i in range(len(timepoint_list)):
             tp=timepoint_list[i].split("timepoint")[1]
-            link_edges[i].set_zorder(int(tp)+0.25)
-        link_edges2=nx.draw_networkx_edges(link_G, all_pos2, ax=ax,width=width_list,edge_color="blue",arrowstyle="->", arrowsize=25,alpha=1)
+            link_edges[i].set_zorder((ZORDER+0.025)*int(tp))
+        link_edges2=nx.draw_networkx_edges(link_G, all_pos2, ax=ax,width=width_list,edge_color="#0060A8",arrowstyle="->", arrowsize=50,alpha=1)
         for i in range(len(timepoint_list)):
             tp=timepoint_list[i].split("timepoint")[1]
-            link_edges2[i].set_zorder(int(tp)+0.25)
+            link_edges2[i].set_zorder((ZORDER+0.025)*int(tp))
+        plt.tight_layout()
         plt.show()
+        ouput_path=self.params.output_dir+self.params.output_name+"/"
+        fig.savefig(ouput_path+"cstreet_result.pdf", bbox_inches='tight')
 
     def run_cstreet(self):
-        params_dict=self.params
 
-        if params_dict["cell_cluster"] == True :
-            print("cell clusters:")
+        if True :
             self.cell_clusters()
-            print("---------done!---------")
         
-        if params_dict['filter_dead_cell'] == True:
-            print("filter_dead_cell")
+        if self.params.filter_dead_cell == True:
             self.filter_dead_cell()
-            print("---------done!---------")
-        if params_dict["filter_lowcell_gene"]:
-            print("filter_lowcell_gene")
-            self.filter_lowcell_gene()
-            print("---------done!---------")
-        if params_dict["filter_lowgene_cells"] == True:
-            print("filter_lowgene_cells")
-            self.filter_lowgene_cells()
-            print("---------done!---------")
         
-        if params_dict["normalize"] == True :
+        if self.params.filter_lowcell_gene == True:
+            self.filter_lowcell_gene()
+        
+        if self.params.filter_lowgene_cells == True:
+            self.filter_lowgene_cells()
+        
+        if self.params.normalize == True :
             self.normalize_data()
-        if params_dict["log_transform"] == True :
+
+        if self.params.log_transform == True :
             self.log_transform()
 
-        if params_dict["highly_variable_genes"] == True :
+        if self.params.highly_variable_genes == True :
             self.highly_variable_genes()
+        
         if True :
-            print("get_knn_inner")
             self.get_knn_inner()
-            print("---------done!---------")
 
-            print("get_knn_link")
             self.get_knn_link()
-            print("---------done!---------")
 
-            print("get_knn_graph")
             self.get_knn_graph()
-            print("---------done!---------")            
 
-            print("filter_knn_graph")
             self.filter_knn_graph()
-            print("---------done!---------")
             
-            print("fa2")
             self.get_cluster_trajectory()
-            print("---------done!---------")
             
-            print("draw_nxG")
             self.get_knn_nxG()
+            
             self.draw_nxG()
-            print("---------done!---------")
 
 
 
