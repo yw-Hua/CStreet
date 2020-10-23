@@ -44,6 +44,7 @@ CStreet is a python script (python 3.6 or higher) for cell states trajectory con
    cdata.params.output_dir="./"
    cdata.params.output_name="cstreet_project"
    
+   
    #Step1:cell cluster
    cdata.params.cell_cluster_pca_n=10
    cdata.params.cell_cluster_knn_n=15
