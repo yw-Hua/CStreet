@@ -1,0 +1,224 @@
+#!python3.6
+import argparse
+import pandas as pd
+def CStreet_parser():
+    cstreet_parser = argparse.ArgumentParser(description='Cstreet')
+    
+    cstreet_parser.add_argument('input_data',
+                                nargs='+',
+                                action='store',
+                                type=str
+                                )
+
+    cstreet_parser.add_argument('--output_dir',
+                                '-o',
+                                action='store',
+                                type=str,
+                                default="./"
+                                )
+    
+    cstreet_parser.add_argument('--output_name',
+                                '-n',
+                                action='store',
+                                type=str,
+                                default="cstreet_project"
+                                )
+
+    cstreet_parser.add_argument('--cell_states',
+                                '-s',
+                                nargs='*',
+                                action='store',
+                                type=str,
+                                default=""
+                                )
+
+    cstreet_parser.add_argument('--cell_cluster_pca_n',
+                                action='store',
+                                type=int,
+                                default=10
+                                )
+    
+    cstreet_parser.add_argument('--cell_cluster_knn_n',
+                                action='store',
+                                type=int,
+                                default=15
+                                )
+
+    cstreet_parser.add_argument('--cell_cluster_resolution',
+                                action='store',
+                                type=float,
+                                default=1
+                                )
+
+    cstreet_parser.add_argument('--No_filter_dead_cell',
+                                action='store_false',
+                                dest='filter_dead_cell'
+                                )
+
+    cstreet_parser.add_argument('--percent_mito_cutoff',
+                                action='store',
+                                type=float,
+                                default=0.2
+                                )
+
+    cstreet_parser.add_argument('--No_filter_lowcell_gene',
+                                action='store_false',
+                                dest='filter_lowcell_gene'
+                                )
+
+    cstreet_parser.add_argument('--min_cells',
+                                action='store',
+                                type=int,
+                                default=3
+                                )
+
+    cstreet_parser.add_argument('--No_filter_lowgene_cells',
+                                action='store_false',
+                                dest='filter_lowgene_cells'
+                                )
+
+    cstreet_parser.add_argument('--min_genes',
+                                action='store',
+                                type=int,
+                                default=200
+                                )
+
+    cstreet_parser.add_argument('--No_normalize',
+                                action='store_false',
+                                dest='normalize'
+                                )
+
+    cstreet_parser.add_argument('--normalize_base',
+                                action='store',
+                                type=int,
+                                default=10000
+                                )
+
+    cstreet_parser.add_argument('--No_log_transform',
+                                action='store_false',
+                                dest='log_transform'
+                                )
+
+    cstreet_parser.add_argument('--highly_variable_genes',
+                                action='store_true'
+                                )
+
+    cstreet_parser.add_argument('--inner_graph_pca_n',
+                                action='store',
+                                type=int,
+                                default=10
+                                )
+
+    cstreet_parser.add_argument('--inner_graph_knn_n',
+                                action='store',
+                                type=int,
+                                default=15
+                                )
+
+    cstreet_parser.add_argument('--link_graph_pca_n',
+                                action='store',
+                                type=int,
+                                default=10
+                                )
+
+    cstreet_parser.add_argument('--link_graph_knn_n',
+                                action='store',
+                                type=int,
+                                default=15
+                                )
+
+    cstreet_parser.add_argument('--max_outgoing',
+                                action='store',
+                                type=int,
+                                default=10
+                                )
+
+    cstreet_parser.add_argument('--min_score',
+                                action='store',
+                                type=float,
+                                default=0.1
+                                )
+
+    cstreet_parser.add_argument('--min_cell_number',
+                                action='store',
+                                type=int,
+                                default=50
+                                )
+
+    return cstreet_parser
+    
+
+if __name__ == '__main__':
+
+    cstreet_parser=CStreet_parser()
+    args = cstreet_parser.parse_args()
+    
+    if len(args.input_data)<2:
+        raise ValueError("2 timepoint datas at least")
+
+    scdata_list=[]
+    cell_name_list=[]
+    for path in args.input_data:
+        data=pd.read_csv(path,header=0, sep="\t",index_col=0)
+        scdata_list.append(data)
+        cell_name_list.append(data.index)
+    
+    cluster_list=[]
+    for i in range(len(args.cell_states)):
+        path=args.cell_states[i]
+        data=pd.read_csv(path,header=None, sep="\t",index_col=0)
+        data.columns=["states"]
+        states=data.loc[cell_name_list[i],"states"].to_list()
+        cluster_list.append(states)
+
+
+    from cstreet import *
+    
+    cdata=CStreetData()
+    for i in range(len(scdata_list)):
+        if i<len(cluster_list):
+            cdata.add_new_timepoint_scdata(scdata_list[i],cluster_list[i])
+        else:
+            cdata.add_new_timepoint_scdata(scdata_list[i])
+
+    #Step0:basic params#
+    cdata.params.output_dir=args.output_dir
+    cdata.params.output_name=args.output_name
+
+    #Step1:cell_cluster# 
+    cdata.params.cell_cluster_pca_n=args.cell_cluster_pca_n
+    cdata.params.cell_cluster_knn_n=args.cell_cluster_knn_n
+    cdata.params.cell_cluster_resolution=args.cell_cluster_resolution
+
+    #Step2:gene and cell filter#
+    cdata.params.filter_dead_cell=args.filter_dead_cell
+    cdata.params.percent_mito_cutoff=args.percent_mito_cutoff
+    cdata.params.filter_lowcell_gene=args.filter_lowcell_gene
+    cdata.params.min_cells=args.min_cells
+    cdata.params.filter_lowgene_cells=args.filter_lowgene_cells
+    cdata.params.min_genes=args.min_genes
+
+    #Step3:normalize#
+    cdata.params.normalize=args.normalize
+    cdata.params.normalize_base=args.normalize_base
+    cdata.params.log_transform=args.log_transform
+
+    #Step4:get HVG#
+    cdata.params.highly_variable_genes=args.highly_variable_genes
+
+    #Step5:get_graph#
+    cdata.params.inner_graph_pca_n=args.inner_graph_pca_n
+    cdata.params.inner_graph_knn_n=args.inner_graph_knn_n
+    cdata.params.link_graph_pca_n=args.link_graph_pca_n
+    cdata.params.link_graph_knn_n=args.link_graph_knn_n
+
+    #Step6:plot graph#
+    cdata.params.max_outgoing=args.max_outgoing
+    cdata.params.min_score=args.min_score
+    cdata.params.min_cell_number=args.min_cell_number
+
+    cdata.run_cstreet()
+
+
+
+
