@@ -1,7 +1,7 @@
 # CStreet: a computed <u>C</u>ell <u>S</u>tates <u>tr</u>ajectory inf<u>e</u>r<u>e</u>nce method for <u>t</u>ime-series single-cell RNA-seq data 
 
 ### Overview
-CStreet is a cell states trajectory inference method for time-series single-cell RNA-seq data. It is written in python (python 3.6 or higher) and is available as a commend line tool and a python library to meet the needs of different users.
+<u>CStreet</u> is a cell states trajectory inference method for time-series single-cell RNA-seq data. It is written in python (python 3.6 or higher) and is available as a commend line tool and a python library to meet the needs of different users.
 
 [Figure1]
 
