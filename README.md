@@ -1,11 +1,11 @@
-# CStreet: a computed *C*ell *S*tates *tr*ajectory inf*e*r*e*nce method for *t*ime-series single-cell RNA-seq data 
+# CStreet: a computed <u>C</u>ell <u>S</u>tates <u>tr</u>ajectory inf<u>e</u>r<u>e</u>nce method for <u>t</u>ime-series single-cell RNA-seq data 
 
 ### Overview
-CStreet is a cell states trajectory construction method for time-series single-cell RNA-seq data. It is written in python (python 3.6 or higher) and is available as a commend line tool and a python library to meet the needs of different users.
+CStreet is a cell states trajectory inference method for time-series single-cell RNA-seq data. It is written in python (python 3.6 or higher) and is available as a commend line tool and a python library to meet the needs of different users.
 
 [Figure1]
 
-CStreet takes advantage of time-series information to construct the connections of *k*-nearest neighbors within and between time points. Then CStreet calculated the connection probabilities of cell states and visualized the trajectory which may include multiple starting points and paths using a force-directed layout method. 
+CStreet takes advantage of time-series information to construct the *k*-nearest neighbors connections within and between time points. Then CStreet calculated the connection probabilities of cell states and visualized the trajectory which may include multiple starting points and paths using a force-directed layout method. 
 
 ### Installation
 CStreet has been packaged and uploaded to PyPI. CStreet and its relevant packages can be installed using one single commands as follows.
