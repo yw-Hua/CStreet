@@ -1,9 +1,9 @@
 # CStreet: a computed *C*ell *S*tates *tr*ajectory inf*e*r*e*nce method for *t*ime-series single-cell RNA-seq data
-- [CStreet: a computed *C*ell *S*tates *tr*ajectory inf*e*r*e*nce method for *t*ime-series single-cell RNA-seq data](#cstreet--a-computed--c-ell--s-tates--tr-ajectory-inf-e-r-e-nce-method-for--t-ime-series-single-cell-rna-seq-data)
-  * [Overview](#overview)
-  * [Installation](#installation)
-  * [Quick Start](#quick-start)
-  * [Citation](#citation)
+- [Overview](#overview)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Citation](#citation)
+
 
 [Figure1]
 
