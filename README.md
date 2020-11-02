@@ -1,4 +1,5 @@
 # CStreet: a computed *C*ell *S*tates *tr*ajectory inf*e*r*e*nce method for *t*ime-series single-cell RNA-seq data
+[TOC]
 
 [Figure1]
 
