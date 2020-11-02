@@ -2,8 +2,11 @@
 - [Overview](#overview)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
-- [Citation](#citation)
+- [Parameter Details](#parameter-details)
+- [Run CStreet in python interface](#run-cstreet-in-python-interface)
+- [Citation](#citation
 
+| [Overview](#overview) | [Installation](#installation) | [Quick Start](#quick-start) | [Parameter Details](#parameter-details) | [Run CStreet in python interface](#run-cstreet-in-python-interface) | [Citation](#citation |
 
 [Figure1]
 
@@ -44,6 +47,10 @@ Type the following command to check whether CStreet has been installed successfu
    - An visulization of inferred cell states trajectory. (YourProjectName.CellStatesTrajectory.pdf)
    [SFig1]
    ![results.png](https://github.com/yw-Hua/MarkdownPicture/blob/master/CStreet/results2.png?raw=true)
+
+## Parameter Details
+
+## Run CStreet in python interface
 
 ## Citation
    > 
