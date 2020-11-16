@@ -1,0 +1,4 @@
+#Only connections and cell states with following conditions have been displayed in the result figure:
+# Connection probability >= 0
+# Total cell number of a state >= 0
+	Node1	Node2	Distance	Distance_normalize	Distance_zscore	Node1_cluster	Node2_cluster
