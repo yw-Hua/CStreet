@@ -179,8 +179,9 @@ optional arguments:
                         Random seed of repeated sampling, which will make the
                         connection probability is reproducible. DEFAULT: 0
   --FigureParam_FigureSize FIGUREPARAM_FIGURESIZE
-                        Figure size of the result figure. Format is (width,
-                        height). DEFAULT:(6,7)
+                        Figure size of the result figure. For example: 
+                        '--FigureParam_FigureSize 6 7' means width is 6 and 
+                        height is 7. DEFAULT: 6 7  
   --FigureParam_LabelBoxWidth FIGUREPARAM_LABELBOXWIDTH
                         Width of the label box in the result figure. For
                         example: '--FigureParam_LabelBoxWidth 10' means 10
