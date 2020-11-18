@@ -6,205 +6,165 @@
 ![Figure1](https://github.com/yw-Hua/MarkdownPicture/raw/master/CStreet/Fig1.png)
 
 ## Overview
-CStreet is a cell states trajectory inference method for time-series single-cell RNA-seq data. It is written in python (python 3.6 or higher) and is available as a commend line tool and a python library to meet the needs of different users.
 
-CStreet takes advantage of time-series information to construct the *k*-nearest neighbors connections within and between time points. Then CStreet calculated the connection probabilities of cell states and visualized the trajectory which may include multiple starting points and paths using a force-directed layout method. 
+CStreet is a cell state trajectory inference method for time-series single-cell RNA-seq data. It is written in Python (Python 3.6 or higher) and is available as a command line tool and a Python library to meet the needs of different users.
+
+CStreet uses time-series information to construct the k-nearest neighbors connections within and between time points. Then, CStreet calculates the connection probabilities of cell states and visualizes the trajectory, which may include multiple starting points and paths, using a force-directed layout method.
 
 ## Installation
-CStreet has been packaged and uploaded to [PyPI](https://pypi.org/project/cstreet/). Before your installation, you'll make sure you have pip available. The pip3 is the package installer for Python. If you don't have pip3 on your machine, try [click here](https://pip.pypa.io/en/stable/) to install it. Then CStreet and its relevant packages can be installed using one single commands as follows.
+
+CStreet has been packaged and uploaded to [PyPI](https://pypi.org/project/cstreet/). Before your installation, ensure that you have pip available. pip3 is the package installer for Python. If you do not have pip3 on your machine, click [here](https://pip.pypa.io/en/stable/) to install it. Then, CStreet and its relevant packages can be installed using a single command.
 
    ```shell
    $ pip3 install cstreet 
    ```
 
 
-Type the following command to check whether CStreet has been installed successfully.
+Type the command below to check whether CStreet has been installed successfully.
 
    ```shell
    $ CStreet -h
    ```
 
 ## Quick Start
-**Input**: 
-   - Expression data: Expression matrix containing the time-series expression level as reads counts or normalized values in tab delimited format, and anndata format are accepted as the input of CStreet. (For example: [ExpressionMatrix_t1.txt]() [ExpressionMatrix_t2.txt]() [ExpressionMatrix_t3.txt]())
-   - Cell states info: The cell states information can be inputted by the user or generated using the internal clustering function of CStreet. (For example: [CellStates_t1.txt]() [CellStates_t2.txt]() [CellStates_t3.txt]())
+
+### Step 1. CStreet installation following the above tutorial.
+
+### Step 2. Input preparation
+
+CStreet utilizes time-series expression levels in tab-delimited format or AnnData format as input. A small test dataset containing normalized expression levels at three time points can be downloaded here.
+
+The cell state information can be generated using the built-in clustering function of CStreet or input by the user. The state information for the test dataset can be downloaded [here]().
+
+### Step 3. Operation of CStreet
 
 **Commandline**:
+
    ```shell
    $ CStreet -i ExpressionMatrix_t1.txt ExpressionMatrix_t1.txt ExpressionMatrix_t1.txt -s CellStates_t1.txt CellStates_t2.txt CellStates_t3.txt -n ProjectName
    ```
 
-**Output**: 
+### Step 4. Output
 
-The contents of the output directory in tree format will be displayed as follows: 
+The contents of the output directory in tree format will be displayed as described below, including the clustered cell state information if it is not provided by users, the connection probabilities of the cell states and a visualization of the inferred cell state trajectories.
 
 ```shell
 PATH/ProjectName
-├── cstreet_result.pdf
-├── figures
-│   ├── timepoint1_fa.pdf
-│   ├── timepoint1_louvain_umap_cord.txt
-│   ├── timepoint1_louvain_umap.pdf
-│   ├── timepoint2_fa.pdf
-│   ├── timepoint2_louvain_umap_cord.txt
-│   ├── timepoint2_louvain_umap.pdf
-│   ├── timepoint3_fa.pdf
-│   ├── timepoint3_louvain_umap_cord.txt
-│   └── timepoint3_louvain_umap.pdf
-└── results
-    ├── alltimepoint_link_cluster_graph.txt
-    ├── timepoint1_cell_info.txt
-    ├── timepoint1_gene_info.txt
-    ├── timepoint1_inner_cluster_graph.txt
-    ├── timepoint2_cell_info.txt
-    ├── timepoint2_gene_info.txt
-    ├── timepoint2_inner_cluster_graph.txt
-    ├── timepoint3_cell_info.txt
-    ├── timepoint3_gene_info.txt
-    └── timepoint3_inner_cluster_graph.txt
+├── ProjectName_CStreetTopology.pdf
+├── SupplementaryFigures
+│   ├── ProjectName_t1_ForceDirectedLayout.pdf
+│   ├── ProjectName_t1_LouvainUMAPClustering.pdf
+│   ├── ProjectName_t1_LouvainUMAPClusteringCoordinates.txt
+│   ├── ProjectName_t2_ForceDirectedLayout.pdf
+│   ├── ProjectName_t2_LouvainUMAPClustering.pdf
+│   ├── ProjectName_t2_LouvainUMAPClusteringCoordinates.txt
+│   └── ...
+└── SupplementaryResults
+    ├── ProjectName_BetweenTimePoints_CellStatesConnectionProbabilities.txt
+    ├── ProjectName_t1_FilteredCellInfo.txt
+    ├── ProjectName_t1_FilteredGeneInfo.txt
+    ├── ProjectName_t1_CellStatesConnectionProbabilities.txt
+    ├── ProjectName_t2_FilteredCellInfo.txt
+    ├── ProjectName_t2_FilteredGeneInfo.txt
+    ├── ProjectName_t2_CellStatesConnectionProbabilities.txt
+    └── ...
 ```
-
-   - The clustered cell states information if not provided by users. (timepoint*_cell_info.txt)
-   - The connection probabilities of cell states. (alltimepoint_link_cluster_graph.txt, timepoint*_inner_cluster_graph.txt)
-   - An visulization of inferred cell states trajectory. (cstreet_result.pdf)
 
 
    ![tiny_data_result.pdf](https://github.com/yw-Hua/MarkdownPicture/raw/master/CStreet/tiny_data_result.png)
 
 ## Parameter Details
 
-```
-usage: CStreet [-h] <-i ExpMatrix1 ExpMatrix2 ExpMatrix3 ...> [-s CellStates1 CellStates2 CellStates3 ...] [-n ProjectName] [-o OutputDir] [options]
+The parameter details of CStreet are as follows:
 
-CStreet is a cell states trajectory inference method for time-series single-cell RNA-seq data.
+-i --Input_ExpMatrix 
+This indicates expression matrixes, which contain the time-series expression level as read counts or normalized values in tab-delimited format. 
 
-optional arguments:
-  -h, --help            show this help message and exit
-  -i INPUT_EXPMATRIX [INPUT_EXPMATRIX ...], --Input_ExpMatrix INPUT_EXPMATRIX [INPUT_EXPMATRIX ...]
-                        Expression matrixes, which will contain the time-
-                        series expression level as reads counts or normalized
-                        values in tab delimited format. For example: '-i
-                        ExpressionMatrix_t1.txt ExpressionMatrix_t2.txt
-                        ExpressionMatrix_t3.txt' means the input of 3
-                        timepoints expression matrixes.
-  --Input_CellonCol {True,False}, -T {True,False}
-                        Whether the cells are arranged on rows or columns in
-                        the expression matrixes. For example: '-T True' means
-                        cells on columns and genes on rows. DEFAULT: False.
-  --Output_Dir OUTPUT_DIR, -o OUTPUT_DIR
-                        Project directory, which will be used to save all
-                        output files. DEFAULT: "./"
-  --Output_Name OUTPUT_NAME, -n OUTPUT_NAME
-                        Project name, which will be used to generate output
-                        file names. DEFAULT: "cstreet_project"
-  --Input_CellStates [INPUT_CELLSTATES [INPUT_CELLSTATES ...]], -s [INPUT_CELLSTATES [INPUT_CELLSTATES ...]]
-                        Cell states information, which must contain a columns
-                        named "state" and the same cell ID with expression
-                        matrixes in tab delimited format. Cell states
-                        information can be inputted by the user or generated
-                        by the internal clustering function of CStreet using
-                        the Louvain algorithm. For example: 'CellStates_t1.txt
-                        CellStates_t2.txt CellStates_t3.txt' means the cell
-                        states information of 3 timepoints expression
-                        matrixes.
-  --CellClusterParam_PCAn CELLCLUSTERPARAM_PCAN
-                        Number of principal components to use, which will be
-                        enabled ONLY if cell states information is not
-                        provided. It can be set to 1 - minimum dimension size
-                        of expression matrixes. DEFAULT: 10
-  --CellClusterParam_kNNn CELLCLUSTERPARAM_KNNN
-                        Number of nearest neighbors to be searched, which will
-                        be enabled ONLY if cell states information is not
-                        provided. It should be in the range 2 to 100 in
-                        general. DEFAULT: 15
-  --CellClusterParam_Resolution CELLCLUSTERPARAM_RESOLUTION
-                        Resolution of the Louvain algorithm, which will be
-                        enabled ONLY if cell states information is not
-                        provided. Higher resolution means finding more and
-                        smaller clusters. DEFAULT: 1.0
-  --Switch_DeadCellFilter {ON,OFF}
-                        A switch of dead cell filter, which filter cell
-                        outliers based on counts percent of Mitochondrial
-                        gene. DEFAULT: "ON"
-  --Threshold_MitoPercent THRESHOLD_MITOPERCENT
-                        Maximum counts percent of Mitochondrial gene for a
-                        cell to pass filtering, which will be enabled ONLY if
-                        '--Switch_DeadCellFilter' is "ON". DEFAULT: 0.2
-  --Switch_LowCellNumGeneFilter {ON,OFF}
-                        A switch of low cell number gene filter, which keep
-                        genes that are expressed in at least a number of
-                        cells. DEFAULT: "ON"
-  --Threshold_LowCellNum THRESHOLD_LOWCELLNUM
-                        Minimum number of cells expressed required for a gene
-                        to pass filtering, which will be enabled ONLY if '--
-                        Switch_LowCellNumGeneFilter' is "ON". DEFAULT: 3
-  --Switch_LowGeneCellsFilter {ON,OFF}
-                        A switch of low gene number cell filter, which keep
-                        cells with at least a number of genes expressed.
-                        DEFAULT: "ON"
-  --Threshold_LowGeneNum THRESHOLD_LOWGENENUM
-                        Minimum number of genes expressed required for a cell
-                        to pass filtering, which will be enabled ONLY if '--
-                        Switch_LowGeneCellsFilter' is "ON". DEFAULT: 200
-  --Switch_Normalize {ON,OFF}
-                        A switch of total read count normalization for per
-                        cell. DEFAULT: "NO"
-  --Threshold_NormalizeBase THRESHOLD_NORMALIZEBASE
-                        Normalize Base of normalization, which will be enabled
-                        ONLY if '--Switch_Normalize' is "ON". If choosing
-                        DEFAULT, it is CPM normalization. DEFAULT: 1e6
-  --Switch_LogTransform {ON,OFF}
-                        A switch of logarithmizing the expression matrix.
-                        DEFAULT: "NO"
-  --WithinTimePointParam_PCAn WITHINTIMEPOINTPARAM_PCAN
-                        Number of principal components to use, which will be
-                        used within a timepoint. It can be set to 1 - minimum
-                        dimension size of expression matrixes. DEFAULT: 10
-  --WithinTimePointParam_kNNn WITHINTIMEPOINTPARAM_KNNN
-                        Number of nearest neighbors to be searched, which will
-                        be used within a timepoint. It should be in the range
-                        2 to 100 in general. DEFAULT: 15
-  --BetweenTimePointParam_PCAn BETWEENTIMEPOINTPARAM_PCAN
-                        Number of principal components to use, which will be
-                        used between timepoints. It can be set to 1 - minimum
-                        dimension size of expression matrixes. DEFAULT: 10
-  --BetweenTimePointParam_kNNn BETWEENTIMEPOINTPARAM_KNNN
-                        Number of nearest neighbors to be searched, which will
-                        be used between timepoints. It should be in the range
-                        2 to 100 in general. DEFAULT: 15
-  --ProbParam_SamplingSize PROBPARAM_SAMPLINGSIZE
-                        Number of repeated sampling trials to estimate the
-                        connection probability. DEFAULT: 5
-  --ProbParam_RandomSeed PROBPARAM_RANDOMSEED
-                        Random seed of repeated sampling, which will make the
-                        connection probability is reproducible. DEFAULT: 0
-  --FigureParam_FigureSize FIGUREPARAM_FIGURESIZE
-                        Figure size of the result figure. For example: 
-                        '--FigureParam_FigureSize 6 7' means width is 6 and 
-                        height is 7. DEFAULT: 6 7  
-  --FigureParam_LabelBoxWidth FIGUREPARAM_LABELBOXWIDTH
-                        Width of the label box in the result figure. For
-                        example: '--FigureParam_LabelBoxWidth 10' means 10
-                        characters will be showed in label box of result
-                        figure. DEFAULT: 10
-  --Threshold_MaxOutDegree THRESHOLD_MAXOUTDEGREE
-                        Maximum number of outdegree for each cell state will
-                        be displayed, which will ONLY be used for
-                        visualization. DEFAULT: 10
-  --Threshold_MinCellNumofStates THRESHOLD_MINCELLNUMOFSTATES
-                        Minimum cell number of each cell state will be
-                        displayed, which will ONLY be used for visualization.
-                        DEFAULT: 50
+-T --Input_CellonCol
+This determines whether the expression level of one cell is displayed as a column in the expression matrixes. For example, '-T' indicates that the gene expression levels of one cell are displayed in a column and the expression levels of one gene across all cells are displayed in a row. 
 
-```
+-o --Output_Dir
+The project directory, which is used to save all output files. DEFAULT: "./".
+
+-n --Output_Name
+The project name, which is used to generate output file names as a prefix. DEFAULT: "CStreet".
+
+-s --Input_CellStates
+An optional parameter that uses CStreet's built-in dimensionality reduction and clustering methods to perform clustering without knowing the cell states (DEFAULT) or accepts the user’s input. The input files should contain the cell state information sharing the same cell ID in the expression matrixes in tab-delimited format.
+
+--CellClusterParam_PCAn
+The number of principal components to use, which is enabled only if the cell state information is not provided. It can be set from 1 to the minimum dimension size of the expression matrixes. DEFAULT: 10.
+
+--CellClusterParam_k
+The number of nearest neighbors to be searched, which is enabled only if the cell state information is not provided. It should be in the range of 2 to 100 in general. DEFAULT: 15. 
+
+--CellClusterParam_Resolution
+The resolution of the Louvain algorithm, which is enabled only if the cell state information is not provided. A higher resolution means that more and smaller clusters are found. DEFAULT: 1.0. 
+
+--Switch_DeadCellFilter
+The switch for the dead cell filter, which filters cell outliers based on the count percent of mitochondrial genes. DEFAULT: "ON".
+
+--Threshold_MitoPercent
+The maximum count percent of mitochondrial genes needed for a cell to pass filtering, which is enabled only if '--Switch_DeadCellFilter' is "ON". DEFAULT: 0.2.
+
+--Switch_LowCellNumGeneFilter
+The switch for the low cell number gene filter, which retains genes that are expressed in at least a certain number of cells. DEFAULT: "ON".
+
+--Threshold_LowCellNum
+The minimum number of cells expressed that is required for a gene to pass filtering, which is enabled only if '-- Switch_LowCellNumGeneFilter' is "ON". DEFAULT: 3.
+
+--Switch_LowGeneCellsFilter
+The switch for the low gene number cell filter, which retains cells with at least a certain number of genes expressed. DEFAULT: "ON".
+
+--Threshold_LowGeneNum
+The minimum number of genes expressed that is required for a cell to pass filtering, which is enabled only if '-- Switch_LowGeneCellsFilter' is "ON". DEFAULT: 200.
+
+--Switch_Normalize
+The switch to enable total read count normalization for each cell. DEFAULT: "NO".
+
+--Threshold_NormalizeBase
+The base of normalization, which is enabled only if '--Switch_Normalize' is "ON". If the DEFAULT is chosen, it is CPM normalization. DEFAULT: 1e6.
+
+--Switch_LogTransform
+The switch to logarithmize the expression matrix. DEFAULT: "NO".
+
+--WithinTimePointParam_PCAn
+The number of principal components to use within a timepoint. It can be set from 1 to the minimum dimension size of the expression matrixes. DEFAULT: 10.
+
+--WithinTimePointParam_k
+The number of nearest neighbors to be searched within a timepoint. It should be in the range of 2 to 100 in general. DEFAULT: 15.
+
+--BetweenTimePointParam_PCAn
+The number of principal components to use between timepoints. It can be set from 1 to the minimum dimension size of the expression matrixes. DEFAULT: 10. 
+
+--BetweenTimePointParam_k
+The number of nearest neighbors to be searched between timepoints. It should be in the range of 2 to 100 in general. DEFAULT: 15.
+
+--ProbParam_SamplingSize
+The number of repeated sampling trials used to estimate the connection probability. DEFAULT: 5.
+
+--ProbParam_RandomSeed
+The random seed of repeated sampling, which makes the connection probability reproducible. DEFAULT: 0.
+
+--FigureParam_FigureSize
+The size of the resulting figure. For example: '--FigureParam_FigureSize 6 7' means width is 6 and height is 7. DEFAULT: 6 7 .)
+
+--FigureParam_LabelBoxWidth
+The width of the label box in the result figure. For example, '--FigureParam_LabelBoxWidth 10' means that 10 characters will be shown in the label box of the resulting figure. DEFAULT: 10.
+
+--Threshold_MaxOutDegree
+The maximum number of outdegrees for each cell state that is displayed, which will only be used for visualization. DEFAULT: 10.
+
+--Threshold_MinCellNumofStates
+The minimum cell number of each cell state that is displayed, which will only be used for visualization. DEFAULT: 50.
 
 
 
 ## Run CStreet in python interface
 
-CStreet can run directly or step by step in [Jupyter Notebook](https://jupyter.org/). 
-The tutorial  is [here]().
+CStreet can also be used step by step in the Python interface and easily integrated into custom scripts. [Here]() is a tutorial written using Jupyter Notebook.
 
 ## Citation
+
    > 
 
