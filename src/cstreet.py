@@ -28,19 +28,19 @@ class CStreetData(object):
     """docstring for CStreetData"""
     class params_object:
         """docstring for params_object"""
-        __slots__=("__Output_Dir","__Output_Name","__CellClusterParam_PCAn","__CellClusterParam_kNNn","__CellClusterParam_Resolution",
+        __slots__=("__Output_Dir","__Output_Name","__CellClusterParam_PCAn","__CellClusterParam_k","__CellClusterParam_Resolution",
             "__Switch_DeadCellFilter","__Threshold_MitoPercent","__Switch_LowCellNumGeneFilter","__Threshold_LowCellNum","__Switch_LowGeneCellsFilter",
             "__Threshold_LowGeneNum","__Switch_Normalize","__Threshold_NormalizeBase","__Switch_LogTransform",
-            "__WithinTimePointParam_PCAn","__WithinTimePointParam_kNNn","__BetweenTimePointParam_PCAn","__BetweenTimePointParam_kNNn",
+            "__WithinTimePointParam_PCAn","__WithinTimePointParam_k","__BetweenTimePointParam_PCAn","__BetweenTimePointParam_k",
             "__Threshold_MaxOutDegree","__Threshold_MinCellNumofStates","__ProbParam_RandomSeed","__ProbParam_SamplingSize","__FigureParam_FigureSize","__FigureParam_LabelBoxWidth")
         
         def __init__(self):
             #Step0:basic params#
             self.__Output_Dir="./"
-            self.__Output_Name="cstreet_project"
+            self.__Output_Name="CStreet"
             #Step1:cell_cluster# 
             self.__CellClusterParam_PCAn=10
-            self.__CellClusterParam_kNNn=15
+            self.__CellClusterParam_k=15
             self.__CellClusterParam_Resolution=1
 
             #Step2:gene and cell filter#
@@ -60,10 +60,10 @@ class CStreetData(object):
 
             #Step5:get_graph#
             self.__WithinTimePointParam_PCAn=10
-            self.__WithinTimePointParam_kNNn=15
+            self.__WithinTimePointParam_k=15
 
             self.__BetweenTimePointParam_PCAn=10
-            self.__BetweenTimePointParam_kNNn=15
+            self.__BetweenTimePointParam_k=15
             #Step6: calculate probability
             self.__ProbParam_RandomSeed=0
             self.__ProbParam_SamplingSize=5
@@ -81,7 +81,7 @@ class CStreetData(object):
             
             s+=f"\n#Step1:cell_cluster# \n"
             s+=f"CellClusterParam_PCAn={self.__CellClusterParam_PCAn}\n"
-            s+=f"CellClusterParam_kNNn={self.__CellClusterParam_kNNn}\n"
+            s+=f"CellClusterParam_k={self.__CellClusterParam_k}\n"
             s+=f"CellClusterParam_Resolution={self.__CellClusterParam_Resolution}\n"
 
             s+=f"\n#Step2:gene and cell filter#\n"
@@ -101,10 +101,10 @@ class CStreetData(object):
 
             s+=f"\n#Step4:get_graph#\n"
             s+=f"WithinTimePointParam_PCAn={self.__WithinTimePointParam_PCAn}\n"
-            s+=f"WithinTimePointParam_kNNn={self.__WithinTimePointParam_kNNn}\n"
+            s+=f"WithinTimePointParam_k={self.__WithinTimePointParam_k}\n"
 
             s+=f"BetweenTimePointParam_PCAn={self.__BetweenTimePointParam_PCAn}\n"
-            s+=f"BetweenTimePointParam_kNNn={self.__BetweenTimePointParam_kNNn}\n"
+            s+=f"BetweenTimePointParam_k={self.__BetweenTimePointParam_k}\n"
             
             s+=f"\n#Step5: calculate probability#\n"
             s+=f"ProbParam_RandomSeed={self.__ProbParam_RandomSeed}\n"
@@ -150,15 +150,15 @@ class CStreetData(object):
             self.__CellClusterParam_PCAn = value
 
         @property
-        def CellClusterParam_kNNn(self):
-            return self.__CellClusterParam_kNNn
-        @CellClusterParam_kNNn.setter
-        def CellClusterParam_kNNn(self,value):
+        def CellClusterParam_k(self):
+            return self.__CellClusterParam_k
+        @CellClusterParam_k.setter
+        def CellClusterParam_k(self,value):
             if not isinstance(value,int):
-                raise ValueError('CellClusterParam_kNNn must be an integer')
+                raise ValueError('CellClusterParam_k must be an integer')
             if value <= 0:
-                raise ValueError('CellClusterParam_kNNn must be bigger than 0')
-            self.__CellClusterParam_kNNn = value
+                raise ValueError('CellClusterParam_k must be bigger than 0')
+            self.__CellClusterParam_k = value
 
         @property
         def CellClusterParam_Resolution(self):
@@ -272,15 +272,15 @@ class CStreetData(object):
             self.__WithinTimePointParam_PCAn = value
 
         @property
-        def WithinTimePointParam_kNNn(self):
-            return self.__WithinTimePointParam_kNNn
-        @WithinTimePointParam_kNNn.setter
-        def WithinTimePointParam_kNNn(self,value):
+        def WithinTimePointParam_k(self):
+            return self.__WithinTimePointParam_k
+        @WithinTimePointParam_k.setter
+        def WithinTimePointParam_k(self,value):
             if not isinstance(value,int):
-                raise ValueError('WithinTimePointParam_kNNn must be an integer')
+                raise ValueError('WithinTimePointParam_k must be an integer')
             if value <= 0:
-                raise ValueError('WithinTimePointParam_kNNn must be bigger than 0')
-            self.__WithinTimePointParam_kNNn = value
+                raise ValueError('WithinTimePointParam_k must be bigger than 0')
+            self.__WithinTimePointParam_k = value
 
         @property
         def BetweenTimePointParam_PCAn(self):
@@ -294,15 +294,15 @@ class CStreetData(object):
             self.__BetweenTimePointParam_PCAn = value
 
         @property
-        def BetweenTimePointParam_kNNn(self):
-            return self.__BetweenTimePointParam_kNNn
-        @BetweenTimePointParam_kNNn.setter
-        def BetweenTimePointParam_kNNn(self,value):
+        def BetweenTimePointParam_k(self):
+            return self.__BetweenTimePointParam_k
+        @BetweenTimePointParam_k.setter
+        def BetweenTimePointParam_k(self,value):
             if not isinstance(value,int):
-                raise ValueError('BetweenTimePointParam_kNNn must be an integer')
+                raise ValueError('BetweenTimePointParam_k must be an integer')
             if value <= 0:
-                raise ValueError('BetweenTimePointParam_kNNn must be bigger than 0')
-            self.__BetweenTimePointParam_kNNn = value
+                raise ValueError('BetweenTimePointParam_k must be bigger than 0')
+            self.__BetweenTimePointParam_k = value
 
         @property
         def ProbParam_SamplingSize(self):
@@ -463,13 +463,13 @@ class CStreetData(object):
 
     @except_output
     @function_timer
-    @params_filter(['CellClusterParam_PCAn','CellClusterParam_kNNn','CellClusterParam_Resolution','Switch_Normalize','Switch_LogTransform'])
+    @params_filter(['CellClusterParam_PCAn','CellClusterParam_k','CellClusterParam_Resolution','Switch_Normalize','Switch_LogTransform'])
     def cell_clusters(self,**kwargs):
 
         self.__create_folder("SupplementaryFigures")
 
         CellClusterParam_PCAn = self.params.CellClusterParam_PCAn = kwargs.setdefault('CellClusterParam_PCAn', self.params.CellClusterParam_PCAn)
-        CellClusterParam_kNNn = self.params.CellClusterParam_kNNn = kwargs.setdefault('CellClusterParam_kNNn', self.params.CellClusterParam_kNNn)
+        CellClusterParam_k = self.params.CellClusterParam_k = kwargs.setdefault('CellClusterParam_k', self.params.CellClusterParam_k)
         CellClusterParam_Resolution = self.params.CellClusterParam_Resolution=kwargs.setdefault("CellClusterParam_Resolution",self.params.CellClusterParam_Resolution)
         normalize_flag = self.params.Switch_Normalize=kwargs.setdefault("Switch_Normalize",self.params.Switch_Normalize)
         log_flag = self.params.Switch_LogTransform=kwargs.setdefault("Switch_LogTransform",self.params.Switch_LogTransform)
@@ -500,7 +500,7 @@ class CStreetData(object):
                 # pca
                 sc.tl.pca(adata_high, n_comps=CellClusterParam_PCAn, svd_solver='arpack')
                 # knn
-                sc.pp.neighbors(adata_high, n_neighbors=CellClusterParam_kNNn, n_pcs=CellClusterParam_PCAn)
+                sc.pp.neighbors(adata_high, n_neighbors=CellClusterParam_k, n_pcs=CellClusterParam_PCAn)
                 sc.tl.louvain(adata_high, resolution=CellClusterParam_Resolution)
                 sc.tl.umap(adata_high)
                 umap_cord=pd.DataFrame(adata_high.obsm["X_umap"])
@@ -586,10 +586,10 @@ class CStreetData(object):
     
     @except_output
     @function_timer
-    @params_filter(["WithinTimePointParam_PCAn","WithinTimePointParam_kNNn"])
+    @params_filter(["WithinTimePointParam_PCAn","WithinTimePointParam_k"])
     def get_knn_within(self,**kwargs):
         pca_n=self.params.WithinTimePointParam_PCAn=kwargs.setdefault("WithinTimePointParam_PCAn",self.params.WithinTimePointParam_PCAn)
-        k=self.params.WithinTimePointParam_kNNn=kwargs.setdefault("WithinTimePointParam_kNNn",self.params.WithinTimePointParam_kNNn)
+        k=self.params.WithinTimePointParam_k=kwargs.setdefault("WithinTimePointParam_k",self.params.WithinTimePointParam_k)
 
         for (timepoint,adata) in self.timepoint_scdata_dict.items():
             print(f"timepoint:{timepoint}")
@@ -621,10 +621,10 @@ class CStreetData(object):
 
     @except_output
     @function_timer
-    @params_filter(["BetweenTimePointParam_PCAn","BetweenTimePointParam_kNNn"])
+    @params_filter(["BetweenTimePointParam_PCAn","BetweenTimePointParam_k"])
     def get_knn_between(self,**kwargs):
         pca_n=self.params.BetweenTimePointParam_PCAn=kwargs.setdefault("BetweenTimePointParam_PCAn",self.params.BetweenTimePointParam_PCAn)
-        k=self.params.BetweenTimePointParam_kNNn=kwargs.setdefault("BetweenTimePointParam_kNNn",self.params.BetweenTimePointParam_kNNn)
+        k=self.params.BetweenTimePointParam_k=kwargs.setdefault("BetweenTimePointParam_k",self.params.BetweenTimePointParam_k)
         for timepoint in list(self.timepoint_scdata_dict.keys())[:-1]:
             print(f"timepoint between {timepoint} and {timepoint+1} ")
 
@@ -858,8 +858,8 @@ class CStreetData(object):
     def get_state_trajectory(self,**kwargs):
         ProbParam_SamplingSize=self.params.ProbParam_SamplingSize=kwargs.setdefault("ProbParam_SamplingSize",self.params.ProbParam_SamplingSize)
         ProbParam_RandomSeed=self.params.ProbParam_RandomSeed=kwargs.setdefault("ProbParam_RandomSeed",self.params.ProbParam_RandomSeed)        
-        within_k=self.params.WithinTimePointParam_kNNn
-        between_k=self.params.BetweenTimePointParam_kNNn
+        within_k=self.params.WithinTimePointParam_k
+        between_k=self.params.BetweenTimePointParam_k
         #within graph
         all_node_cluster=pd.DataFrame()
         for (timepoint,adata) in self.timepoint_scdata_dict.items():
