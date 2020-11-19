@@ -10,7 +10,7 @@ def CStreet_parser():
     cstreet_parser.add_argument('-v',
                                 '--version',
                                 action='version',
-                                version='CStreet 0.0.18',
+                                version='CStreet 0.1.0',
                                 help='''show version number of CStreet and exit''')
 
     cstreet_parser.add_argument('-i',
@@ -78,10 +78,10 @@ def CStreet_parser():
     cstreet_parser.add_argument('--CellClusterParam_Resolution',
                                 action='store',
                                 type=float,
-                                default=1,
+                                default=0.1,
                                 help='''The resolution of the Louvain algorithm, which is enabled only if the cell state information is not provided. 
                                 A higher resolution means that more and smaller clusters are found. 
-                                DEFAULT: 1.0. '''
+                                DEFAULT: 0.1. '''
                                 )
 
     cstreet_parser.add_argument('--Switch_DeadCellFilter',
@@ -281,7 +281,11 @@ if __name__ == '__main__':
             path=args.Input_CellStates[i]
             data=pd.read_csv(path,header=None, sep="\t",index_col=0)
             data.columns=["state"]
-            states=data.loc[cell_name_list[i],"state"].to_list()
+            try:
+                states=data.loc[cell_name_list[i],"state"].to_list()    
+            except KeyError as e:
+                raise ValueError("The cell state information must share the same cell ID in the expression matrixes!")
+
             cluster_list.append(states)
 
 

@@ -47,7 +47,7 @@ CStreet utilizes time-series expression levels in tab-delimited format or AnnDat
 
 The cell state information can be generated using the built-in clustering function of CStreet or input by the user. 
 
-We provided a small [test dataset]() containing normalized expression levels and the state information at three time points. 
+We provided a small [test dataset](https://github.com/yw-Hua/CStreet/tree/master/test/test_data) containing normalized expression levels and the state information at three time points. 
 
 Or type the command below to download.
 
@@ -91,7 +91,7 @@ PATH/ProjectName
 ```
 
 
-   ![tiny_data_result.pdf](https://github.com/yw-Hua/MarkdownPicture/raw/master/CStreet/tiny_data_result.png)
+   ![tiny_data_result.pdf](https://github.com/yw-Hua/MarkdownPicture/raw/master/CStreet/example_project_CStreetTopology.jpg)
 
 ## Parameter Details
 
@@ -104,7 +104,7 @@ CStreet is a cell states trajectory inference method for time-series single-cell
 
 optional arguments:
   -h, --help            show this help message and exit
-  -v, --version         show version number and exit
+  -v, --version         show version number of CStreet and exit
   -i INPUT_EXPMATRIX [INPUT_EXPMATRIX ...], --Input_ExpMatrix INPUT_EXPMATRIX [INPUT_EXPMATRIX ...]
                         This indicates expression matrixes, which contain the
                         time-series expression level as read counts or
@@ -149,7 +149,7 @@ optional arguments:
                         The resolution of the Louvain algorithm, which is
                         enabled only if the cell state information is not
                         provided. A higher resolution means that more and
-                        smaller clusters are found. DEFAULT: 1.0.
+                        smaller clusters are found. DEFAULT: 0.1.
   --Switch_DeadCellFilter {ON,OFF}
                         The switch for the dead cell filter, which filters
                         cell outliers based on the count percent of
@@ -233,9 +233,5 @@ optional arguments:
 
 ## Run CStreet in python interface
 
-CStreet can also be used step by step in the Python interface and easily integrated into custom scripts. [Here]() is a tutorial written using Jupyter Notebook.
-
-## Citation
-
-   > 
+CStreet can also be used step by step in the Python interface and easily integrated into custom scripts. [Here](https://nbviewer.jupyter.org/github/yw-Hua/CStreet/blob/master/tutorial.ipynb) is a tutorial written using Jupyter Notebook.
 
