@@ -27,17 +27,6 @@ You may experience errors when installing or updating packages. This is because 
    $ pip3 install cstreet --use-feature=2020-resolver
    ```
 
-You may need to use the command below to add the default installation path of pip3 to your system path,
-
- ```shell
-  $ export PATH=~/.local/bin:$PATH
- ```
-
-Then, type the command below to check whether CStreet has been installed successfully.（For the first time running, it may takes about one minute for CStreet’s initial configuration.）
-
-   ```shell
-   $ CStreet -h
-   ```
 
 ## Quick Start
 
