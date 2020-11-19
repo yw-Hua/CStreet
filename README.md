@@ -1,6 +1,6 @@
 # CStreet: a computed <ins>C</ins>ell <ins>S</ins>tate <ins>tr</ins>ajectory inf<ins>e</ins>r<ins>e</ins>nce method for <ins>t</ins>ime-series single-cell RNA-seq data
 
-![label1](https://img.shields.io/badge/version-v0.1.0--beta-yellow)  ![label2](https://img.shields.io/badge/license-MIT-green)
+![label1](https://img.shields.io/badge/version-v0.1.0--beta-yellow)![label2](https://img.shields.io/badge/license-MIT-green)
 
 **| [Overview](#overview) | [Installation](#installation) | [Quick Start](#quick-start) | [Parameter Details](#parameter-details) | [Run CStreet in python interface](#run-cstreet-in-python-interface) | [Citation](#citation) |**
 
@@ -27,6 +27,17 @@ You may experience errors when installing or updating packages. This is because 
    $ pip3 install cstreet --use-feature=2020-resolver
    ```
 
+You may need to use the command below to add the default installation path of pip3 to your system path,
+
+ ```shell
+  $ export PATH=~/.local/bin:$PATH
+ ```
+
+Then, type the command below to check whether CStreet has been installed successfully.（For the first time running, it may takes about one minute for CStreet’s initial configuration.）
+
+   ```shell
+   $ CStreet -h
+   ```
 
 ## Quick Start
 
