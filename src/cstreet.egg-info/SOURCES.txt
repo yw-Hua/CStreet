@@ -1,0 +1,10 @@
+README.md
+setup.py
+bin/CStreet
+src/__init__.py
+src/cstreet.py
+src/cstreet.egg-info/PKG-INFO
+src/cstreet.egg-info/SOURCES.txt
+src/cstreet.egg-info/dependency_links.txt
+src/cstreet.egg-info/requires.txt
+src/cstreet.egg-info/top_level.txt
