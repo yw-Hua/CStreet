@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: cstreet
-Version: 0.1.0
+Version: 0.1.1
 Summary: CStreet is a python script (python 3.6, 3.7 or 3.8) for cell state trajectory construction by using k-nearest neighbors graph algorithm for time-series single-cell RNA-seq data.
 Home-page: https://github.com/yw-Hua/CStreet
 Author: Yuwei Hua

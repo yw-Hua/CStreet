@@ -10,7 +10,7 @@ def CStreet_parser():
     cstreet_parser.add_argument('-v',
                                 '--version',
                                 action='version',
-                                version='CStreet 0.1.0',
+                                version='CStreet 0.1.1',
                                 help='''show version number of CStreet and exit''')
 
     cstreet_parser.add_argument('-i',
