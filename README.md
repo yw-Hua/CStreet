@@ -1,6 +1,7 @@
 # CStreet: a computed <ins>C</ins>ell <ins>S</ins>tate <ins>tr</ins>ajectory inf<ins>e</ins>r<ins>e</ins>nce method for <ins>t</ins>ime-series single-cell RNA-seq data
 
-![label1](https://img.shields.io/badge/version-v0.1.1--beta-yellow)	![label2](https://img.shields.io/badge/license-MIT-green)
+
+![label1](https://img.shields.io/badge/version-v1.0.0--beta-yellow)	![label2](https://img.shields.io/badge/license-MIT-green)
 
 <!-- **| [Overview](#overview) | [Installation](#installation) | [Quick Start](#quick-start) | [Parameter Details](#parameter-details) | [Run CStreet in python interface](#run-cstreet-in-python-interface) | [Citation](#citation) |**-->
 **| [Overview](#overview) | [Installation](#installation) | [Quick Start](#quick-start) | [Parameter Details](#parameter-details) | [Run CStreet in Python interface](#run-cstreet-in-python-interface)  |**
@@ -188,6 +189,9 @@ optional arguments:
   --Switch_LogTransform {ON,OFF}
                         The switch to logarithmize the expression matrix.
                         DEFAULT: "NO".
+  --KNNParam_metric KNNPARAM_METRIC
+                        The distance metric to use for kNN. It can be set to
+                        "euclidean" or "correlation". DEFAULT: "euclidean".
   --WithinTimePointParam_PCAn WITHINTIMEPOINTPARAM_PCAN
                         The number of principal components to use within a
                         timepoint. It can be set from 1 to the minimum
@@ -222,6 +226,13 @@ optional arguments:
                         example, '--FigureParam_LabelBoxWidth 10' means that
                         10 characters will be shown in the label box of the
                         resulting figure. DEFAULT: 10.
+  --Threshold_MinProbability THRESHOLD_MINPROBABILITY
+                        The minimum probability of edge for each cell state
+                        that is displayed, which will only be used for
+                        visualization. It can be a number between 0 and 1 or
+                        "OTSU". When OTSU is selected, it will be
+                        automatically estimated using OTSU's Method (OTSU,
+                        1979). DEFAULT: "OTSU".
   --Threshold_MaxOutDegree THRESHOLD_MAXOUTDEGREE
                         The maximum number of outdegrees for each cell state
                         that is displayed, which will only be used for
@@ -237,4 +248,3 @@ optional arguments:
 ## Run CStreet in Python interface
 
 CStreet can also be used step by step in the Python interface and easily integrated into custom scripts. [Here](https://nbviewer.jupyter.org/github/yw-Hua/CStreet/blob/master/tutorial.ipynb) is a tutorial written using Jupyter Notebook.
-
