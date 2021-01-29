@@ -20,7 +20,9 @@ import traceback
 from retrying import retry
 import warnings
 import random
+from scipy.stats import t
 warnings.filterwarnings("ignore")
+from scipy.spatial.distance import correlation
 
 #定义cstreet对象
 
@@ -32,7 +34,8 @@ class CStreetData(object):
             "__Switch_DeadCellFilter","__Threshold_MitoPercent","__Switch_LowCellNumGeneFilter","__Threshold_LowCellNum","__Switch_LowGeneCellsFilter",
             "__Threshold_LowGeneNum","__Switch_Normalize","__Threshold_NormalizeBase","__Switch_LogTransform",
             "__WithinTimePointParam_PCAn","__WithinTimePointParam_k","__BetweenTimePointParam_PCAn","__BetweenTimePointParam_k",
-            "__Threshold_MaxOutDegree","__Threshold_MinCellNumofStates","__ProbParam_RandomSeed","__ProbParam_SamplingSize","__FigureParam_FigureSize","__FigureParam_LabelBoxWidth")
+            "__Threshold_MaxOutDegree","__Threshold_MinCellNumofStates","__ProbParam_RandomSeed","__ProbParam_SamplingSize",
+            "__FigureParam_FigureSize","__FigureParam_LabelBoxWidth","__Threshold_MinProbability","__KNNParam_metric")
         
         def __init__(self):
             #Step0:basic params#
@@ -59,17 +62,20 @@ class CStreetData(object):
             self.__Switch_LogTransform=True
 
             #Step5:get_graph#
+            self.__KNNParam_metric="euclidean"
             self.__WithinTimePointParam_PCAn=10
             self.__WithinTimePointParam_k=15
 
             self.__BetweenTimePointParam_PCAn=10
             self.__BetweenTimePointParam_k=15
+
             #Step6: calculate probability
             self.__ProbParam_RandomSeed=0
             self.__ProbParam_SamplingSize=5
             #Step7:plot graph#
             self.__FigureParam_FigureSize=(6,7)
             self.__FigureParam_LabelBoxWidth=10
+            self.__Threshold_MinProbability="OTSU"
             self.__Threshold_MaxOutDegree=10
             self.__Threshold_MinCellNumofStates=0
         
@@ -100,6 +106,7 @@ class CStreetData(object):
             s+=f"Switch_LogTransform={self.__Switch_LogTransform}\n"
 
             s+=f"\n#Step4:get_graph#\n"
+            s+=f"KNNParam_metric={self.__KNNParam_metric}\n"
             s+=f"WithinTimePointParam_PCAn={self.__WithinTimePointParam_PCAn}\n"
             s+=f"WithinTimePointParam_k={self.__WithinTimePointParam_k}\n"
 
@@ -113,6 +120,7 @@ class CStreetData(object):
             s+=f"\n#Step6:plot graph#\n"
             s+=f"FigureParam_FigureSize={self.__FigureParam_FigureSize}\n"
             s+=f"FigureParam_LabelBoxWidth={self.__FigureParam_LabelBoxWidth}\n"
+            s+=f"Threshold_MinProbability={self.__Threshold_MinProbability}\n"
             s+=f"Threshold_MaxOutDegree={self.__Threshold_MaxOutDegree}\n"
             s+=f"Threshold_MinCellNumofStates={self.__Threshold_MinCellNumofStates}\n"
             return s
@@ -368,6 +376,27 @@ class CStreetData(object):
                 raise ValueError('Threshold_MinCellNumofStates must be bigger than 0')
             self.__Threshold_MinCellNumofStates = value
 
+        @property
+        def Threshold_MinProbability(self):
+            return self.__Threshold_MinProbability
+        @Threshold_MinProbability.setter
+        def Threshold_MinProbability(self,value):
+            if not isinstance(value,(int,float)) and value != "OTSU":
+                raise ValueError('Threshold_MinProbability must be numeric')
+            if value != "OTSU":
+                if value < 0 or value > 1 :
+                    raise ValueError('Threshold_MinProbability must be between 0.0 and 1.0') 
+            self.__Threshold_MinProbability = value
+        
+        @property
+        def KNNParam_metric(self):
+            return self.__KNNParam_metric
+        @KNNParam_metric.setter
+        def KNNParam_metric(self,value):
+            if not isinstance(value,str):
+                raise ValueError('KNNParam_metric must be "euclidean" or "correlation"')
+            self.__KNNParam_metric = value
+
     params=None
     timepoint_scdata_dict={}
     between_knn_graph=None
@@ -593,7 +622,9 @@ class CStreetData(object):
     def get_knn_within(self,**kwargs):
         pca_n=self.params.WithinTimePointParam_PCAn=kwargs.setdefault("WithinTimePointParam_PCAn",self.params.WithinTimePointParam_PCAn)
         k=self.params.WithinTimePointParam_k=kwargs.setdefault("WithinTimePointParam_k",self.params.WithinTimePointParam_k)
-
+        KNNParam_metric=self.params.KNNParam_metric=kwargs.setdefault("KNNParam_metric",self.params.KNNParam_metric)
+        if KNNParam_metric != "euclidean" :
+            KNNParam_metric = correlation
         for (timepoint,adata) in self.timepoint_scdata_dict.items():
             print(f"timepoint:{timepoint}")
             df=pd.DataFrame(adata.X)
@@ -612,7 +643,7 @@ class CStreetData(object):
             sample_name = np.array(['timepoint%s_cell%s'%(timepoint, j) for j in range(df.shape[0])])
 
             # KNN graph
-            nbrs = NearestNeighbors(n_neighbors=k+1, metric='correlation', n_jobs=-2)
+            nbrs = NearestNeighbors(n_neighbors=k+1, metric=KNNParam_metric, n_jobs=-2)
             nbrs.fit(df_zscore_pca)
             dists, ind = nbrs.kneighbors(df_zscore_pca) # n*k_init dist & index
             adj = nbrs.kneighbors_graph(df_zscore_pca, mode='distance') # n*n dist
@@ -628,6 +659,10 @@ class CStreetData(object):
     def get_knn_between(self,**kwargs):
         pca_n=self.params.BetweenTimePointParam_PCAn=kwargs.setdefault("BetweenTimePointParam_PCAn",self.params.BetweenTimePointParam_PCAn)
         k=self.params.BetweenTimePointParam_k=kwargs.setdefault("BetweenTimePointParam_k",self.params.BetweenTimePointParam_k)
+        KNNParam_metric=self.params.KNNParam_metric=kwargs.setdefault("KNNParam_metric",self.params.KNNParam_metric)
+        
+        if KNNParam_metric != "euclidean" :
+            KNNParam_metric = correlation
         for timepoint in list(self.timepoint_scdata_dict.keys())[:-1]:
             print(f"timepoint between {timepoint} and {timepoint+1} ")
 
@@ -659,7 +694,7 @@ class CStreetData(object):
             df_start_pca = pca.transform(df_start)
 
             # KNN distance (start)
-            nbrs = NearestNeighbors(n_neighbors=k+1, metric='correlation', n_jobs=-2)
+            nbrs = NearestNeighbors(n_neighbors=k+1, metric=KNNParam_metric, n_jobs=-2)
             nbrs.fit(df_end_pca)
             dists, ind = nbrs.kneighbors(df_start_pca) # n*k_init dist & index
             adj = nbrs.kneighbors_graph(df_start_pca, mode='distance') # n*n dist
@@ -667,7 +702,7 @@ class CStreetData(object):
             adata_start.obsm["between_later_ind"]=adata_end.obs["cell_id"][ind[:, 1:]]
             adata_start.obsm['between_later_distance']=adj
             # KNN distance (end)
-            nbrs = NearestNeighbors(n_neighbors=k+1, metric='correlation', n_jobs=-2)
+            nbrs = NearestNeighbors(n_neighbors=k+1, metric=KNNParam_metric, n_jobs=-2)
             nbrs.fit(df_start_pca)
             dists, ind = nbrs.kneighbors(df_end_pca) # n*k_init dist & index
             adj = nbrs.kneighbors_graph(df_end_pca, mode='distance') # n*n dist
@@ -844,11 +879,16 @@ class CStreetData(object):
                 b=len(Node2_cluster_sample_cells)
                 tmp_edge_num_max=(a+b)*k
                 results_list.append(tmp_edge_num/tmp_edge_num_max)
-
-
-            return [np.mean(results_list)]+results_list
+            
+            mean=np.mean(results_list)
+            sd=np.std(results_list)
+            n=ProbParam_SamplingSize
+            dof = n - 1
+            alpha = 1.0 - 0.95
+            conf_interval = t.ppf(1-alpha/2., dof) * sd/np.sqrt(n)
+            return [mean,conf_interval]+results_list
         knn_graph_egde['probability_rep']=knn_graph_egde.apply(get_edge_score,args=(node_cluster,ProbParam_RandomSeed,k,ProbParam_SamplingSize),axis=1)
-        knn_graph_egde[["probability"]+[f"probability_rep{i+1}" for i in range(ProbParam_SamplingSize)]]=knn_graph_egde['probability_rep'].apply(pd.Series)
+        knn_graph_egde[["probability"]+["conf_interval"]+[f"probability_rep{i+1}" for i in range(ProbParam_SamplingSize)]]=knn_graph_egde['probability_rep'].apply(pd.Series)
         knn_graph_egde=knn_graph_egde.drop(columns='probability_rep')
 
         return knn_graph_egde
@@ -957,6 +997,7 @@ class CStreetData(object):
     def get_knn_nxG(self,**kwargs):
         topN=self.params.Threshold_MaxOutDegree=kwargs.setdefault("Threshold_MaxOutDegree",self.params.Threshold_MaxOutDegree)
         #min_score=self.params.min_score=kwargs.setdefault("min_score",self.params.min_score)
+        Threshold_MinProbability=self.params.Threshold_MinProbability=kwargs.setdefault("Threshold_MinProbability",self.params.Threshold_MinProbability)
         Threshold_MinCellNumofStates=self.params.Threshold_MinCellNumofStates=kwargs.setdefault("Threshold_MinCellNumofStates",self.params.Threshold_MinCellNumofStates)
 
         def otsu(p_list):
@@ -988,7 +1029,10 @@ class CStreetData(object):
             p_list=knn_graph_egde["probability"]
             zero_n=(len(allnodes)**2-len(allnodes))-len(p_list)
             p_list=np.append(p_list,[0.0]*zero_n)
-            min_score=otsu(p_list)
+            if Threshold_MinProbability =="OTSU":
+                min_score=otsu(p_list)
+            else:
+                min_score=Threshold_MinProbability
             adata.uns["min_score"]=min_score
 
             allnodes_counts=adata.uns["cluster_counts"]
@@ -1012,7 +1056,10 @@ class CStreetData(object):
             edge_n+=node_cluster_num[i]*node_cluster_num[i+1]
         zero_n=edge_n-len(p_list)
         p_list=np.append(p_list,[0.0]*zero_n)
-        min_score=otsu(p_list)
+        if Threshold_MinProbability =="OTSU":
+            min_score=otsu(p_list)
+        else:
+            min_score=Threshold_MinProbability
         self.min_score=min_score
         between_G=self.__get_nxG(knn_graph_egde, filtered_node_cluster,min_score)
         self.between_G=between_G
@@ -1394,7 +1441,7 @@ class CStreetData(object):
         cell_num=self.params.Threshold_MinCellNumofStates
         ouput_path=self.params.Output_Dir+self.params.Output_Name+"/SupplementaryResults/"
         output_name=self.params.Output_Name
-        
+        all_cluster_graph=self.cluster_graph
         for (timepoint,adata) in self.timepoint_scdata_dict.items():
             print(f"timepoint:{timepoint}")
             min_score=adata.uns["min_score"]
@@ -1407,7 +1454,7 @@ class CStreetData(object):
             adata.obs.to_csv(ouput_path+f"{output_name}_tp{timepoint}_FilteredCellInfo.txt",sep="\t")
             adata.var.to_csv(ouput_path+f"{output_name}_tp{timepoint}_FilteredGeneInfo.txt",sep="\t")
             adata.uns["cluster_graph"].to_csv(ouput_path+f"{output_name}_tp{timepoint}_CellStatesConnectionProbabilities.txt",mode='a',sep="\t",float_format='%.5f')
-
+            all_cluster_graph=pd.concat([all_cluster_graph,adata.uns["cluster_graph"]])
         min_score=self.min_score
         with open(ouput_path+f"{output_name}_BetweenTimePoints_CellStatesConnectionProbabilities.txt","w") as fw:
             s=f'''#Only connections and cell states with following conditions have been displayed in the result figure:
@@ -1417,7 +1464,9 @@ class CStreetData(object):
             fw.write(s)
 
         self.cluster_graph.to_csv(ouput_path+f"{output_name}_BetweenTimePoints_CellStatesConnectionProbabilities.txt",mode='a',sep="\t",float_format='%.5f')
-
+        all_cluster_graph=all_cluster_graph.loc[:,["Node1_cluster","Node2_cluster","probability"]]
+        all_cluster_graph.columns=["SourceNode","TargetNode","ConnectionProbabilities"]
+        all_cluster_graph.to_csv(ouput_path+f"{output_name}_CellStatesConnectionProbabilities.txt",mode='w',sep="\t",float_format='%.5f',index=False)
     @function_timer
     def run_cstreet(self):
 
