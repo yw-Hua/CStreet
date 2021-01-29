@@ -10,7 +10,7 @@ def CStreet_parser():
     cstreet_parser.add_argument('-v',
                                 '--version',
                                 action='version',
-                                version='CStreet 0.1.1',
+                                version='CStreet 1.0.0',
                                 help='''show version number of CStreet and exit''')
 
     cstreet_parser.add_argument('-i',
@@ -160,6 +160,13 @@ def CStreet_parser():
                                 help='''The switch to logarithmize the expression matrix. 
                                 DEFAULT: "NO".'''
                                 )
+    cstreet_parser.add_argument('--KNNParam_metric',
+                                action='store',
+                                type=str,
+                                default="euclidean",
+                                help='''The distance metric to use for kNN. It can be set to "euclidean" or "correlation".
+                                DEFAULT: "euclidean".'''
+                                )
 
     cstreet_parser.add_argument('--WithinTimePointParam_PCAn',
                                 action='store',
@@ -223,6 +230,14 @@ def CStreet_parser():
                                 default=10,
                                 help='''The width of the label box in the result figure. For example, '--FigureParam_LabelBoxWidth 10' means that 10 characters will be shown in the label box of the resulting figure. 
                                 DEFAULT: 10.'''
+                                )
+
+    cstreet_parser.add_argument('--Threshold_MinProbability',
+                                action='store',
+                                type=float,
+                                default=-1,
+                                help='''The minimum probability of edge for each cell state that is displayed, which will only be used for visualization. It can be a number between 0 and 1 or "OTSU". When OTSU is selected, it will be automatically estimated using OTSU's Method (OTSU, 1979).
+                                DEFAULT: "OTSU".'''
                                 )
 
     cstreet_parser.add_argument('--Threshold_MaxOutDegree',
@@ -322,6 +337,7 @@ if __name__ == '__main__':
     cdata.params.Switch_LogTransform=True if args.Switch_LogTransform=="ON" else False
 
     #Step4:get_graph#
+    cdata.params.KNNParam_metric=args.KNNParam_metric
     cdata.params.WithinTimePointParam_PCAn=args.WithinTimePointParam_PCAn
     cdata.params.WithinTimePointParam_k=args.WithinTimePointParam_k
     cdata.params.BetweenTimePointParam_PCAn=args.BetweenTimePointParam_PCAn
@@ -335,6 +351,7 @@ if __name__ == '__main__':
     cdata.params.FigureParam_LabelBoxWidth=args.FigureParam_LabelBoxWidth
     cdata.params.Threshold_MaxOutDegree=args.Threshold_MaxOutDegree
     cdata.params.Threshold_MinCellNumofStates=args.Threshold_MinCellNumofStates
+    cdata.params.Threshold_MinProbability="OTSU" if args.Threshold_MinProbability == -1 else args.Threshold_MinProbability
 
     cdata.run_cstreet()
 
