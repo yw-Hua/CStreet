@@ -993,7 +993,7 @@ class CStreetData(object):
 
     @except_output
     @function_timer
-    @params_filter(["Threshold_MaxOutDegree","Threshold_MinCellNumofStates"])
+    @params_filter(["Threshold_MaxOutDegree","Threshold_MinCellNumofStates","Threshold_MinProbability"])
     def get_knn_nxG(self,**kwargs):
         topN=self.params.Threshold_MaxOutDegree=kwargs.setdefault("Threshold_MaxOutDegree",self.params.Threshold_MaxOutDegree)
         #min_score=self.params.min_score=kwargs.setdefault("min_score",self.params.min_score)
@@ -1133,7 +1133,7 @@ class CStreetData(object):
             if (
                 np.iterable(edge_color)
                 and (len(edge_color) == len(edge_pos))
-                and np.alltrue([isinstance(c, Number) for c in edge_color])
+                and np.alltrue([isinstance(c, (int,float)) for c in edge_color])
             ):
                 if edge_cmap is not None:
                     assert isinstance(edge_cmap, Colormap)
@@ -1466,7 +1466,7 @@ class CStreetData(object):
         self.cluster_graph.to_csv(ouput_path+f"{output_name}_BetweenTimePoints_CellStatesConnectionProbabilities.txt",mode='a',sep="\t",float_format='%.5f')
         all_cluster_graph=all_cluster_graph.loc[:,["Node1_cluster","Node2_cluster","probability"]]
         all_cluster_graph.columns=["SourceNode","TargetNode","ConnectionProbabilities"]
-        all_cluster_graph.to_csv(ouput_path+f"{output_name}_CellStatesConnectionProbabilities.txt",mode='w',sep="\t",float_format='%.5f',index=False)
+        all_cluster_graph.to_csv(f"{self.params.Output_Dir}{self.params.Output_Name}/{output_name}_CellStatesConnCytoscape.txt",mode='w',sep="\t",float_format='%.5f',index=False)
     @function_timer
     def run_cstreet(self):
 
