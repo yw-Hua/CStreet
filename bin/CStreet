@@ -10,7 +10,7 @@ def CStreet_parser():
     cstreet_parser.add_argument('-v',
                                 '--version',
                                 action='version',
-                                version='CStreet 1.0.0',
+                                version='CStreet 1.0.1',
                                 help='''show version number of CStreet and exit''')
 
     cstreet_parser.add_argument('-i',
@@ -278,10 +278,12 @@ if __name__ == '__main__':
         
         if str(path).split(".")[-1]=="txt":
             data=pd.read_csv(path,header=0, sep="\t",index_col=0)
-            cell_name_list.append(data.index)
+            # cell_name_list.append(data.index)
             if args.row_cell_flag :
+                cell_name_list.append(data.columns)
                 scdata_list.append(data.T)
             else:
+                cell_name_list.append(data.index)
                 scdata_list.append(data)
         elif str(path).split(".")[-1]=="h5ad":
             data=sc.read_h5ad(path).to_df()
