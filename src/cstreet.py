@@ -886,9 +886,10 @@ class CStreetData(object):
             dof = n - 1
             alpha = 1.0 - 0.95
             conf_interval = t.ppf(1-alpha/2., dof) * sd/np.sqrt(n)
+            conf_interval = f"({mean-conf_interval:.5f},{mean+conf_interval:.5f})"
             return [mean,conf_interval]+results_list
         knn_graph_egde['probability_rep']=knn_graph_egde.apply(get_edge_score,args=(node_cluster,ProbParam_RandomSeed,k,ProbParam_SamplingSize),axis=1)
-        knn_graph_egde[["probability"]+["conf_interval"]+[f"probability_rep{i+1}" for i in range(ProbParam_SamplingSize)]]=knn_graph_egde['probability_rep'].apply(pd.Series)
+        knn_graph_egde[["probability"]+["95_conf_interval"]+[f"probability_rep{i+1}" for i in range(ProbParam_SamplingSize)]]=knn_graph_egde['probability_rep'].apply(pd.Series)
         knn_graph_egde=knn_graph_egde.drop(columns='probability_rep')
 
         return knn_graph_egde
@@ -1453,7 +1454,8 @@ class CStreetData(object):
                 fw.write(s)
             adata.obs.to_csv(ouput_path+f"{output_name}_tp{timepoint}_FilteredCellInfo.txt",sep="\t")
             adata.var.to_csv(ouput_path+f"{output_name}_tp{timepoint}_FilteredGeneInfo.txt",sep="\t")
-            adata.uns["cluster_graph"].to_csv(ouput_path+f"{output_name}_tp{timepoint}_CellStatesConnectionProbabilities.txt",mode='a',sep="\t",float_format='%.5f')
+            cluster_graph_file=adata.uns["cluster_graph"].loc[:,["Node1_cluster","Node2_cluster","total_edge_num","Node1_cluster_cell_num","Node2_cluster_cell_num","probability","95_conf_interval"]]
+            cluster_graph_file.to_csv(ouput_path+f"{output_name}_tp{timepoint}_CellStatesConnectionProbabilities.txt",mode='a',sep="\t",float_format='%.5f')
             all_cluster_graph=pd.concat([all_cluster_graph,adata.uns["cluster_graph"]])
         min_score=self.min_score
         with open(ouput_path+f"{output_name}_BetweenTimePoints_CellStatesConnectionProbabilities.txt","w") as fw:
@@ -1462,10 +1464,10 @@ class CStreetData(object):
 # Total cell number of a state >= {cell_num}
 '''
             fw.write(s)
-
-        self.cluster_graph.to_csv(ouput_path+f"{output_name}_BetweenTimePoints_CellStatesConnectionProbabilities.txt",mode='a',sep="\t",float_format='%.5f')
-        all_cluster_graph=all_cluster_graph.loc[:,["Node1_cluster","Node2_cluster","probability"]]
-        all_cluster_graph.columns=["SourceNode","TargetNode","ConnectionProbabilities"]
+        cluster_graph_file=self.cluster_graph.loc[:,["Node1_cluster","Node2_cluster","total_edge_num","Node1_cluster_cell_num","Node2_cluster_cell_num","probability","95_conf_interval"]]
+        cluster_graph_file.to_csv(ouput_path+f"{output_name}_BetweenTimePoints_CellStatesConnectionProbabilities.txt",mode='a',sep="\t",float_format='%.5f')
+        all_cluster_graph=all_cluster_graph.loc[:,["Node1_cluster","Node2_cluster","probability","95_conf_interval"]]
+        all_cluster_graph.columns=["SourceNode","TargetNode","ConnectionProbabilities","95ConfidenceIntervals"]
         all_cluster_graph.to_csv(f"{self.params.Output_Dir}{self.params.Output_Name}/{output_name}_CellStatesConnCytoscape.txt",mode='w',sep="\t",float_format='%.5f',index=False)
     @function_timer
     def run_cstreet(self):
