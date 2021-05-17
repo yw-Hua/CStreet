@@ -10,7 +10,7 @@ def CStreet_parser():
     cstreet_parser.add_argument('-v',
                                 '--version',
                                 action='version',
-                                version='CStreet 1.0.2',
+                                version='CStreet 1.0.4',
                                 help='''show version number of CStreet and exit''')
 
     cstreet_parser.add_argument('-i',
@@ -141,7 +141,7 @@ def CStreet_parser():
                                 choices=["ON","OFF"],
                                 default="ON",
                                 help='''The switch to enable total read count normalization for each cell. 
-                                DEFAULT: "NO".'''
+                                DEFAULT: "ON".'''
                                 )
 
     cstreet_parser.add_argument('--Threshold_NormalizeBase',

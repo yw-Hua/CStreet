@@ -463,6 +463,8 @@ class CStreetData(object):
     def add_new_timepoint_scdata(self,timepoint_scdata,timepoint_scdata_cluster=None):
         data=pd.DataFrame(timepoint_scdata)
         data=data.fillna(0)
+        ind=(data.std()>0.01).to_list()
+        data=data.loc[:,ind]
         self.timepoint_scdata_dict[self.__timepoint_scdata_num]=ad.AnnData(data)
         if timepoint_scdata_cluster != None:
             self.timepoint_scdata_dict[self.__timepoint_scdata_num].obs["scdata_cluster"]=[f"timepoint{self.__timepoint_scdata_num}_{c}" for c in list(timepoint_scdata_cluster)]
@@ -858,7 +860,7 @@ class CStreetData(object):
             
 
             def tmp_filter(df,Node1_cluster_sample_cells,Node2_cluster_sample_cells):
-                if df["Node1"] in Node1_cluster_sample_cells and df["Node2"] in Node2_cluster_sample_cells:
+                if df["Node1"].isin(Node1_cluster_sample_cells) & df["Node2"].isin(Node2_cluster_sample_cells):
                     return 1
                 else:
                     return 0
@@ -873,8 +875,9 @@ class CStreetData(object):
                 else:
                     Node1_cluster_sample_cells=list(Node1_df.sample(frac=1, random_state=ProbParam_RandomSeed+i, axis=0)["cell_id"])
                     Node2_cluster_sample_cells=list(Node2_df.sample(frac=0.5, random_state=ProbParam_RandomSeed+i, axis=0)["cell_id"])
-
-                tmp_edge_num=sum(knn_graph.apply(tmp_filter,args=(Node1_cluster_sample_cells, Node2_cluster_sample_cells),axis=1))
+                # !!!spend too many time!!!
+                tmp_edge_num=sum(knn_graph["Node1"].isin(Node1_cluster_sample_cells) & knn_graph["Node2"].isin(Node2_cluster_sample_cells))
+                # !!!!!!!!!!!!!!!!!!!!!!!!!
                 a=len(Node1_cluster_sample_cells)
                 b=len(Node2_cluster_sample_cells)
                 tmp_edge_num_max=(a+b)*k
@@ -1048,7 +1051,7 @@ class CStreetData(object):
             fa_cord_all = self.__force_directed_layout(G=within_G,timepoint=timepoint)
             adata.uns["fa_cord"]=fa_cord_all
 
-        knn_graph_egde=self.cluster_graph.groupby(["Node1_cluster"],as_index=False).head(topN)
+        knn_graph_egde=self.cluster_graph.sort_values(by='probability', ascending=False).groupby(["Node1_cluster"],as_index=False).head(topN)
         self.filtered_cluster_node=filtered_node_cluster
         p_list=knn_graph_egde["probability"]
 
@@ -1327,7 +1330,7 @@ class CStreetData(object):
             )
 
             return text_items
-        ZORDER=0.1
+        ZORDER=0.01
         TRANS=25 
         SQ=np.array([[-2.5,12.5],[12.5,12.5],[12.5,-2.5],[-2.5,-2.5],[-2.5,12.5]]).T
         T=np.array([[1,0],[1,1.5]])
@@ -1389,10 +1392,10 @@ class CStreetData(object):
             all_pos3={**all_pos3,**pos5}
             #pos
             nodes=nx.draw_networkx_nodes(G, pos, ax=ax, node_size=100, node_color=CCCOLOR[timepoint], alpha=1)
-            nodes.set_zorder((ZORDER+0.05)*timepoint)
+            nodes.set_zorder((ZORDER)*timepoint+0.0005)
             edges=nx.draw_networkx_edges(G, pos, ax=ax, width=width_list,edge_color="black", alpha=1)
             if G.number_of_edges() != 0:
-                edges.set_zorder((ZORDER+0.015)*timepoint)
+                edges.set_zorder((ZORDER)*timepoint+0.00015)
             nx.draw_networkx_labels(G, pos,labels, ax=ax, font_size=8, font_color="white",font_weight="bold")
             
             bbox={
@@ -1422,12 +1425,12 @@ class CStreetData(object):
         between_edges=nx.draw_networkx_edges(between_G, all_pos, ax=ax,width=width_list,edge_color="#0060A8",arrowstyle="->", arrowsize=20,alpha=1,min_source_margin=0)
         for i in range(len(timepoint_list)):
             tp=timepoint_list[i].split("timepoint")[1]
-            between_edges[i].set_zorder((ZORDER+0.025)*int(tp))
+            between_edges[i].set_zorder((ZORDER)*int(tp)+0.00025)
         
         between_edges2=draw_networkx_edges(between_G, all_pos2,all_pos3, ax=ax,width=width_list,edge_color="#0060A8",arrowstyle="->", arrowsize=20,alpha=1,min_source_margin=10,node_size=100)
         for i in range(len(timepoint_list)):
             tp=timepoint_list[i].split("timepoint")[1]
-            between_edges2[i].set_zorder((ZORDER+0.025)*int(tp))
+            between_edges2[i].set_zorder((ZORDER)*int(tp)+0.025)
         plt.tight_layout()
         plt.show(block=False)
         plt.pause(0.05)
@@ -1506,13 +1509,3 @@ class CStreetData(object):
             self.draw_nxG()
 
             self.output_results()
-
-
-
-
-
-
-
-
-
-

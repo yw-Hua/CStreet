@@ -1,6 +1,6 @@
 # CStreet: a computed <ins>C</ins>ell <ins>S</ins>tate <ins>tr</ins>ajectory inf<ins>e</ins>r<ins>e</ins>nce method for <ins>t</ins>ime-series single-cell RNA-seq data
 
-![label1](https://img.shields.io/badge/version-v1.0.2--beta-yellow)	![label2](https://img.shields.io/badge/license-MIT-green)
+![label1](https://img.shields.io/badge/version-v1.0.4--beta-yellow)	![label2](https://img.shields.io/badge/license-MIT-green)
 
 <!-- **| [Overview](#overview) | [Installation](#installation) | [Quick Start](#quick-start) | [Parameter Details](#parameter-details) | [Run CStreet in python interface](#run-cstreet-in-python-interface) | [Citation](#citation) |**-->
 **| [Overview](#overview) | [Installation](#installation) | [Quick Start](#quick-start) | [Parameter Details](#parameter-details) | [Run CStreet in Python interface](#run-cstreet-in-python-interface)  |**
@@ -181,7 +181,7 @@ optional arguments:
                         '-- Switch_LowGeneCellsFilter' is "ON". DEFAULT: 200.
   --Switch_Normalize {ON,OFF}
                         The switch to enable total read count normalization
-                        for each cell. DEFAULT: "NO".
+                        for each cell. DEFAULT: "ON".
   --Threshold_NormalizeBase THRESHOLD_NORMALIZEBASE
                         The base of normalization, which is enabled only if '
                         --Switch_Normalize' is "ON". If the DEFAULT is chosen,
