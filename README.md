@@ -1,6 +1,6 @@
 # CStreet: a computed <ins>C</ins>ell <ins>S</ins>tate <ins>tr</ins>ajectory inf<ins>e</ins>r<ins>e</ins>nce method for <ins>t</ins>ime-series single-cell RNA-seq data
 
-![label1](https://img.shields.io/badge/version-v1.1.0-yellow)	![label2](https://img.shields.io/badge/license-MIT-green)
+![label1](https://img.shields.io/badge/version-v1.1.1-yellow)	![label2](https://img.shields.io/badge/license-MIT-green)
 
 <!-- **| [Overview](#overview) | [Installation](#installation) | [Quick Start](#quick-start) | [Parameter Details](#parameter-details) | [Run CStreet in python interface](#run-cstreet-in-python-interface) | [Citation](#citation) |**-->
 **| [Overview](#overview) | [Installation](#installation) | [Quick Start](#quick-start) | [Parameter Details](#parameter-details) | [Run CStreet in Python interface](#run-cstreet-in-python-interface)  |**
@@ -214,13 +214,12 @@ optional arguments:
                         The number of repeated sampling trials used to
                         estimate the connection probability. DEFAULT: 5.
   --ProbParam_RandomSeed PROBPARAM_RANDOMSEED
-                        The size of the resulting figure. For example: '--
-                        FigureParam_FigureSize 6 7' means width is 6 and
-                        height is 7. DEFAULT: 6 7 .)
+                        The seed of repeated sampling trials used to estimate 
+                        the connection probability. DEFAULT: 0.
   --FigureParam_FigureSize FIGUREPARAM_FIGURESIZE FIGUREPARAM_FIGURESIZE
                         Figure size of the result figure. For example: '--
                         FigureParam_FigureSize 6 7' indicates width is 6 and
-                        height is 7. DEFAULT: 6 7
+                        height is 7. DEFAULT: 6 7.
   --FigureParam_LabelBoxWidth FIGUREPARAM_LABELBOXWIDTH
                         The width of the label box in the result figure. For
                         example, '--FigureParam_LabelBoxWidth 10' means that

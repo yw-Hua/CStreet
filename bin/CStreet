@@ -10,7 +10,7 @@ def CStreet_parser():
     cstreet_parser.add_argument('-v',
                                 '--version',
                                 action='version',
-                                version='CStreet 1.1.0',
+                                version='CStreet 1.1.1',
                                 help='''show version number of CStreet and exit''')
 
     cstreet_parser.add_argument('-i',
@@ -114,7 +114,7 @@ def CStreet_parser():
                                 action='store',
                                 type=int,
                                 default=3,
-                                help='''The minimum number of cells expressed that is required for a gene to pass filtering, which is enabled only if '-- Switch_LowCellNumGeneFilter' is "ON". 
+                                help='''The minimum number of cells expressed that is required for a gene to pass filtering, which is enabled only if '--Switch_LowCellNumGeneFilter' is "ON". 
                                 DEFAULT: 3.'''
                                 )
 
@@ -131,7 +131,7 @@ def CStreet_parser():
                                 action='store',
                                 type=int,
                                 default=200,
-                                help='''The minimum number of genes expressed that is required for a cell to pass filtering, which is enabled only if '-- Switch_LowGeneCellsFilter' is "ON". 
+                                help='''The minimum number of genes expressed that is required for a cell to pass filtering, which is enabled only if '--Switch_LowGeneCellsFilter' is "ON". 
                                 DEFAULT: 200.'''
                                 )
 
@@ -158,7 +158,7 @@ def CStreet_parser():
                                 choices=["ON","OFF"],
                                 default="ON",
                                 help='''The switch to logarithmize the expression matrix. 
-                                DEFAULT: "NO".'''
+                                DEFAULT: "ON".'''
                                 )
     cstreet_parser.add_argument('--KNNParam_metric',
                                 action='store',
@@ -212,8 +212,8 @@ def CStreet_parser():
                                 action='store',
                                 type=int,
                                 default=0,
-                                help='''The size of the resulting figure. For example: '--FigureParam_FigureSize 6 7' means width is 6 and height is 7. 
-                                DEFAULT: 6 7 .)'''
+                                help='''The seed of repeated sampling trials used to estimate the connection probability. 
+                                DEFAULT: 0 .'''
                                 )
 
     cstreet_parser.add_argument('--FigureParam_FigureSize',
@@ -221,7 +221,7 @@ def CStreet_parser():
                                 nargs=2,
                                 type=float,
                                 default=(6,7),
-                                help="Figure size of the result figure. For example: '--FigureParam_FigureSize 6 7' indicates width is 6 and height is 7. DEFAULT: 6 7 "
+                                help="Figure size of the result figure. For example: '--FigureParam_FigureSize 6 7' indicates width is 6 and height is 7. DEFAULT: 6 7. "
                                 )
 
     cstreet_parser.add_argument('--FigureParam_LabelBoxWidth',
