@@ -10,7 +10,7 @@ long_description = (here / 'README.md').read_text(encoding='utf-8')
 setup(
     name='cstreet',  # Required
 
-    version='1.0.4',  # Required
+    version='1.1.0',  # Required
 
     description='CStreet is a python script (python 3.6, 3.7 or 3.8) for cell state trajectory construction by using k-nearest neighbors graph algorithm for time-series single-cell RNA-seq data.',  # Optional
 
@@ -29,7 +29,7 @@ setup(
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
 
         # Indicate who your project is intended for
         'Intended Audience :: Developers',
