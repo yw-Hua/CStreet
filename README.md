@@ -170,7 +170,7 @@ optional arguments:
   --Threshold_LowCellNum THRESHOLD_LOWCELLNUM
                         The minimum number of cells expressed that is required
                         for a gene to pass filtering, which is enabled only if
-                        '-- Switch_LowCellNumGeneFilter' is "ON". DEFAULT: 3.
+                        '--Switch_LowCellNumGeneFilter' is "ON". DEFAULT: 3.
   --Switch_LowGeneCellsFilter {ON,OFF}
                         The switch for the low gene number cell filter, which
                         retains cells with at least a certain number of genes
@@ -178,7 +178,7 @@ optional arguments:
   --Threshold_LowGeneNum THRESHOLD_LOWGENENUM
                         The minimum number of genes expressed that is required
                         for a cell to pass filtering, which is enabled only if
-                        '-- Switch_LowGeneCellsFilter' is "ON". DEFAULT: 200.
+                        '--Switch_LowGeneCellsFilter' is "ON". DEFAULT: 200.
   --Switch_Normalize {ON,OFF}
                         The switch to enable total read count normalization
                         for each cell. DEFAULT: "ON".
