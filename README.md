@@ -2,7 +2,7 @@
 
 ![label1](https://img.shields.io/badge/version-v1.1.1-yellow)	![label2](https://img.shields.io/badge/license-MIT-green)
 
-**| [Overview](#overview) | [Installation](#installation) | [Quick Start](#quick-start) | [Parameter Details](#parameter-details) | [Run CStreet in python interface](#run-cstreet-in-python-interface) | [Data&Code](#supplementary-data&code) | **
+**| [Overview](#overview) | [Installation](#installation) | [Quick Start](#quick-start) | [Parameter Details](#parameter-details) | [Run CStreet in python interface](#run-cstreet-in-python-interface) | [Data&Code](#supplementary-data&code) |**
 
 <!-- **| [Overview](#overview) | [Installation](#installation) | [Quick Start](#quick-start) | [Parameter Details](#parameter-details) | [Run CStreet in python interface](#run-cstreet-in-python-interface) | [Data&Code](#supplementary-data&code) | [Citation](#citation) |**-->
 
