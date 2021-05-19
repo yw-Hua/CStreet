@@ -2,8 +2,11 @@
 
 ![label1](https://img.shields.io/badge/version-v1.1.1-yellow)	![label2](https://img.shields.io/badge/license-MIT-green)
 
-<!-- **| [Overview](#overview) | [Installation](#installation) | [Quick Start](#quick-start) | [Parameter Details](#parameter-details) | [Run CStreet in python interface](#run-cstreet-in-python-interface) | [Citation](#citation) |**-->
-**| [Overview](#overview) | [Installation](#installation) | [Quick Start](#quick-start) | [Parameter Details](#parameter-details) | [Run CStreet in Python interface](#run-cstreet-in-python-interface)  |**
+**| [Overview](#overview) | [Installation](#installation) | [Quick Start](#quick-start) | [Parameter Details](#parameter-details) | [Run CStreet in python interface](#run-cstreet-in-python-interface) | [Data&Code](#supplementary-data&code) | **
+
+<!-- **| [Overview](#overview) | [Installation](#installation) | [Quick Start](#quick-start) | [Parameter Details](#parameter-details) | [Run CStreet in python interface](#run-cstreet-in-python-interface) | [Data&Code](#supplementary-data&code) | [Citation](#citation) |**-->
+
+
 
 
 ![Figure1](https://github.com/yw-Hua/MarkdownPicture/raw/master/CStreet/Fig1.png)
@@ -246,4 +249,12 @@ optional arguments:
 
 ## Run CStreet in Python interface
 
-CStreet can also be used step by step in the Python interface and easily integrated into custom scripts. [Here](https://nbviewer.jupyter.org/github/yw-Hua/CStreet/blob/master/tutorial.ipynb) is a tutorial written using Jupyter Notebook.
+CStreet can also be used step by step in the Python interface and easily integrated into custom scripts. [Here](https://nbviewer.jupyter.org/github/yw-Hua/CStreet/blob/master/tutorial.ipynb) is a tutorial written using [Jupyter Notebook](https://jupyter.org/).
+
+## Supplementary Data&Code
+
+All supplementary code and data, including cell type annotations, used to run the comparisons are available on [here](https://1drv.ms/u/s!Atc1l0sjoiRyhaxOqZYIGkgOyI3Lhg?e=bfhR9u).
+The [Anndata h5ad file format](https://anndata.readthedocs.io/en/stable/index.html) is used to stored  single-cell expression data and additional annotations in our supplementary file.
+
+
+
