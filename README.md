@@ -2,9 +2,9 @@
 
 ![label1](https://img.shields.io/badge/version-v1.1.1-yellow)	![label2](https://img.shields.io/badge/license-MIT-green)
 
-**| [Overview](#overview) | [Installation](#installation) | [Quick Start](#quick-start) | [Parameter Details](#parameter-details) | [Run CStreet in python interface](#run-cstreet-in-python-interface) | [Data&Code](#supplementary-datacode) |**
 
-<!-- **| [Overview](#overview) | [Installation](#installation) | [Quick Start](#quick-start) | [Parameter Details](#parameter-details) | [Run CStreet in python interface](#run-cstreet-in-python-interface) | [Data&Code](#supplementary-data&code) | [Citation](#citation) |**-->
+
+ **| [Overview](#overview) | [Installation](#installation) | [Quick Start](#quick-start) | [Parameter Details](#parameter-details) | [Run CStreet in python interface](#run-cstreet-in-python-interface) | [Data&Code](#supplementary-datacode) | [Citation](#citation) |**
 
 
 
@@ -256,5 +256,6 @@ CStreet can also be used step by step in the Python interface and easily integra
 All supplementary code and data, including cell type annotations, used to run the comparisons are available on [here](https://1drv.ms/u/s!Atc1l0sjoiRyhaxOqZYIGkgOyI3Lhg?e=bfhR9u).
 The [Anndata h5ad file format](https://anndata.readthedocs.io/en/stable/index.html) is used to stored  single-cell expression data and additional annotations in our supplementary file.
 
-
+## Citation
+Zhao C, Xiu W, Hua Y, Zhang N, Zhang Y. CStreet: a computed Cell State trajectory inference method for time-series single-cell RNA sequencing data. Bioinformatics (Oxford, England). 2021 Jul. DOI: 10.1093/bioinformatics/btab488.
 
