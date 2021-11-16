@@ -234,8 +234,8 @@ def CStreet_parser():
 
     cstreet_parser.add_argument('--Threshold_MinProbability',
                                 action='store',
-                                type=float,
-                                default=-1,
+                                type=str,
+                                default="OTSU",
                                 help='''The minimum probability of edge for each cell state that is displayed, which will only be used for visualization. It can be a number between 0 and 1 or "OTSU". When OTSU is selected, it will be automatically estimated using OTSU's Method (OTSU, 1979).
                                 DEFAULT: "OTSU".'''
                                 )
@@ -353,7 +353,7 @@ if __name__ == '__main__':
     cdata.params.FigureParam_LabelBoxWidth=args.FigureParam_LabelBoxWidth
     cdata.params.Threshold_MaxOutDegree=args.Threshold_MaxOutDegree
     cdata.params.Threshold_MinCellNumofStates=args.Threshold_MinCellNumofStates
-    cdata.params.Threshold_MinProbability="OTSU" if args.Threshold_MinProbability == -1 else args.Threshold_MinProbability
+    cdata.params.Threshold_MinProbability="OTSU" if args.Threshold_MinProbability == "OTSU" else float(args.Threshold_MinProbability)
 
     cdata.run_cstreet()
 

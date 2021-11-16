@@ -1,6 +1,6 @@
 # CStreet: a computed <ins>C</ins>ell <ins>S</ins>tate <ins>tr</ins>ajectory inf<ins>e</ins>r<ins>e</ins>nce method for <ins>t</ins>ime-series single-cell RNA-seq data
 
-![label1](https://img.shields.io/badge/version-v1.1.1-yellow)	![label2](https://img.shields.io/badge/license-MIT-green)
+![label1](https://img.shields.io/badge/version-v1.1.2-yellow)	![label2](https://img.shields.io/badge/license-MIT-green)
 
 
 
@@ -258,4 +258,3 @@ The [Anndata h5ad file format](https://anndata.readthedocs.io/en/stable/index.ht
 
 ## Citation
 Zhao C, Xiu W, Hua Y, Zhang N, Zhang Y. CStreet: a computed Cell State trajectory inference method for time-series single-cell RNA sequencing data. Bioinformatics (Oxford, England). 2021 Jul. DOI: 10.1093/bioinformatics/btab488.
-
